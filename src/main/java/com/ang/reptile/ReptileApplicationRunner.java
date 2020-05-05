@@ -1,7 +1,5 @@
 package com.ang.reptile;
 
-import com.ang.reptile.model.DataBus;
-import com.ang.reptile.model.Message;
 import com.ang.reptile.service.DoorTracking;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +8,6 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
 @Component
 public class ReptileApplicationRunner implements ApplicationRunner {
@@ -21,7 +18,7 @@ public class ReptileApplicationRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        try {
+        /*try {
             logger.info("开始抓取数据！请等待返回结果！");
 
             DataBus<List<String>> dataBus = doorTracking.loopDoorTrackingData();
@@ -31,6 +28,6 @@ public class ReptileApplicationRunner implements ApplicationRunner {
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("获取数据出现异常！退出程序！");
-        }
+        }*/
     }
 }

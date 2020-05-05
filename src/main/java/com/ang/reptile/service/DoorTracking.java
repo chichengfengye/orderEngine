@@ -1,7 +1,7 @@
 package com.ang.reptile.service;
 
 import com.alibaba.fastjson.JSON;
-import com.ang.reptile.config.Config;
+import com.ang.reptile.config.HttpConfig;
 import com.ang.reptile.mapper.HeJiaOrderMapper;
 import com.ang.reptile.model.DataBus;
 import com.ang.reptile.model.Page;
@@ -38,19 +38,19 @@ public class DoorTracking {
      * @return
      */
     public DataBus<List<String>> loopDoorTrackingData() {
-        Config config = ConfigReader.getConfig();
+        HttpConfig httpConfig = ConfigReader.getConfig("E:\\projects_2\\order\\config.json");
 
-        HashMap<String, String> cookies = config.getCookies();
+        HashMap<String, String> cookies = httpConfig.getCookies();
         if (cookies != null && cookies.size() > 0) {
             cookieMap = cookies;
         }
 
-        HashMap<String, String> headers = config.getHeaders();
+        HashMap<String, String> headers = httpConfig.getHeaders();
         if (headers != null && headers.size() > 0) {
             this.headers = headers;
         }
 
-        this.reqUrl = config.getUrl();
+        this.reqUrl = httpConfig.getUrl();
 
         int allDataSize = 0;
         int allDBItemSize = 0;

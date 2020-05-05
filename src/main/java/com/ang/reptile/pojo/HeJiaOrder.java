@@ -4,19 +4,21 @@ import java.util.Date;
 
 public class HeJiaOrder {
     private Long id;
+    private String orderInfoName;
     private Long createdDate;
-    private String state;
+    private String orderCode;
+//    private String state;
     private String receiverName;
     private String receiverAddress;
     private String receiverPhone;
     private Integer orderNum;//商品数量
-    private Double transportCost;//配送费用
+//    private Double transportCost;//配送费用
     private Double orderAmount;//订单总额
     private Double preferentialAmount;//优惠金额
     private Double receivableAmount;//应收金额; ---
     private Double payAmount;//实收金额;
     private String jsonStr;
-    private Boolean active;
+    private Boolean active = true;
     private Date createdAt;
     private Date updateAt;
 
@@ -28,6 +30,14 @@ public class HeJiaOrder {
         this.id = id;
     }
 
+    public String getOrderInfoName() {
+        return orderInfoName;
+    }
+
+    public void setOrderInfoName(String orderInfoName) {
+        this.orderInfoName = orderInfoName;
+    }
+
     public Long getCreatedDate() {
         return createdDate;
     }
@@ -36,13 +46,20 @@ public class HeJiaOrder {
         this.createdDate = createdDate;
     }
 
-    public String getState() {
+    public String getOrderCode() {
+        return orderCode;
+    }
+
+    public void setOrderCode(String orderCode) {
+        this.orderCode = orderCode;
+    }
+/*    public String getState() {
         return state;
     }
 
     public void setState(String state) {
         this.state = state;
-    }
+    }*/
 
     public String getReceiverName() {
         return receiverName;
@@ -75,6 +92,7 @@ public class HeJiaOrder {
     public void setOrderNum(Integer orderNum) {
         this.orderNum = orderNum;
     }
+/*
 
     public Double getTransportCost() {
         return transportCost;
@@ -83,6 +101,7 @@ public class HeJiaOrder {
     public void setTransportCost(Double transportCost) {
         this.transportCost = transportCost;
     }
+*/
 
     public Double getOrderAmount() {
         return orderAmount;
@@ -152,12 +171,12 @@ public class HeJiaOrder {
     public String toString() {
         return "HeJiaOrder{" +
                 "createdDate=" + createdDate +
-                ", state='" + state + '\'' +
+//                ", state='" + state + '\'' +
                 ", receiverName='" + receiverName + '\'' +
                 ", receiverAddress='" + receiverAddress + '\'' +
                 ", receiverPhone='" + receiverPhone + '\'' +
                 ", orderNum=" + orderNum +
-                ", transportCost=" + transportCost +
+//                ", transportCost=" + transportCost +
                 ", orderAmount=" + orderAmount +
                 ", preferentialAmount=" + preferentialAmount +
                 ", receivableAmount=" + receivableAmount +

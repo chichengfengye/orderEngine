@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.ang.reptile.model.DataBus;
 import com.ang.reptile.model.Message;
 import com.ang.reptile.service.DoorTracking;
+import com.ang.reptile.service.OrderCreater;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,9 @@ import java.util.List;
 public class Controller {
     @Autowired
     private DoorTracking doorTracking;
+    @Autowired
+    private OrderCreater orderCreater;
+
 
     @RequestMapping("/getData")
     public Message getData() {
@@ -36,5 +40,10 @@ public class Controller {
     public Object test(@RequestBody HashMap jsonObject) {
         System.out.println(jsonObject);
         return jsonObject;
+    }
+
+    @RequestMapping("/createOrder")
+    public Object createOrder() {
+        return orderCreater.createOrder();
     }
 }

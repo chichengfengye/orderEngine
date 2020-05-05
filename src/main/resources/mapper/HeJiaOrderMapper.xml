@@ -4,12 +4,13 @@
 <mapper namespace="com.ang.reptile.mapper.HeJiaOrderMapper">
     <sql id="insertColumns">
             created_date,
-            state,
+            order_info_name,
+--             state,
             receiver_name,
             receiver_address,
             receiver_phone,
             order_num,
-            transport_cost,
+--             transport_cost,
             order_amount,
             preferential_amount,
             receivableAmount,
@@ -21,12 +22,13 @@
     <sql id="selectColumns">
             id,
             created_date,
-            state,
+            order_info_name,
+--             state,
             receiver_name,
             receiver_address,
             receiver_phone,
             order_num,
-            transport_cost,
+--             transport_cost,
             order_amount,
             preferential_amount,
             receivableAmount,
@@ -41,12 +43,13 @@
         insert into hejia_order(<include refid="insertColumns"></include>)
         values(
             #{createdDate},
-            #{state},
+            #{orderInfoName},
+--             #{state},
             #{receiverName},
             #{receiverAddress},
             #{receiverPhone},
             #{orderNum},
-            #{transportCost},
+--             #{transportCost},
             #{orderAmount},
             #{preferentialAmount},
             #{receivableAmount},
@@ -56,14 +59,21 @@
             #{createdAt}
         )
     </insert>
+
     <select id="getHeJiaOrders" parameterType="com.ang.reptile.model.Page" resultType="com.ang.reptile.pojo.HeJiaOrder">
         select <include refid="selectColumns" />
         from hejia_order
         where id > #{page.id}
             and active = #{active}
-        limit #{page.pageSize}
         order by id asc
+        limit #{page.pageSize}
     </select>
+
+    <update id="updateStateById" parameterType="com.ang.reptile.pojo.HeJiaOrder">
+        update hejia_order
+        set active = #{active}
+        where id = #{id}
+    </update>
     <!--<select id="GetUserByID" parameterType="int" resultType="com.test.springtest.dao.MUser">
         select * from `student` where id = #{id}
     </select>

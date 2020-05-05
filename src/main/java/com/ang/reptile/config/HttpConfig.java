@@ -4,7 +4,7 @@ import lombok.Data;
 
 import java.util.HashMap;
 
-public class Config {
+public class HttpConfig {
     private HashMap<String, String> headers;
     private HashMap<String, String> cookies;
     private HashMap<String, String> other;

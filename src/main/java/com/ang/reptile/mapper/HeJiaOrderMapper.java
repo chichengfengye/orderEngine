@@ -11,4 +11,6 @@ public interface HeJiaOrderMapper {
     int insert(HeJiaOrder heJiaOrder);
 
     List<HeJiaOrder> getHeJiaOrders(@Param("page") Page page, @Param("active") Boolean active);
+
+    int updateStateById(HeJiaOrder order);
 }
