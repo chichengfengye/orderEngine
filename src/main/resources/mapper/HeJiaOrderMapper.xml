@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ang.reptile.mapper.HeJiaOrderMapper">
+    <sql id="insertColumns">
+            created_date,
+            state,
+            receiver_name,
+            receiver_address,
+            receiver_phone,
+            order_num,
+            transport_cost,
+            order_amount,
+            preferential_amount,
+            receivableAmount,
+            pay_amount,
+            jsonStr,
+            active,
+            created_at
+    </sql>
+    <sql id="selectColumns">
+            id,
+            created_date,
+            state,
+            receiver_name,
+            receiver_address,
+            receiver_phone,
+            order_num,
+            transport_cost,
+            order_amount,
+            preferential_amount,
+            receivableAmount,
+            pay_amount,
+            jsonStr,
+            active,
+            created_at,
+            update_at
+    </sql>
+
+    <insert id="insert" parameterType="com.ang.reptile.pojo.HeJiaOrder">
+        insert into hejia_order(<include refid="insertColumns"></include>)
+        values(
+            #{createdDate},
+            #{state},
+            #{receiverName},
+            #{receiverAddress},
+            #{receiverPhone},
+            #{orderNum},
+            #{transportCost},
+            #{orderAmount},
+            #{preferentialAmount},
+            #{receivableAmount},
+            #{payAmount},
+            #{jsonStr},
+            #{active},
+            #{createdAt}
+        )
+    </insert>
+    <select id="getHeJiaOrders" parameterType="com.ang.reptile.model.Page" resultType="com.ang.reptile.pojo.HeJiaOrder">
+        select <include refid="selectColumns" />
+        from hejia_order
+        where id > #{page.id}
+            and active = #{active}
+        limit #{page.pageSize}
+        order by id asc
+    </select>
+    <!--<select id="GetUserByID" parameterType="int" resultType="com.test.springtest.dao.MUser">
+        select * from `student` where id = #{id}
+    </select>
+
+    <insert
+            id="saveUser" parameterType="com.test.springtest.User"
+            useGeneratedKeys="true">
+        insert into student(NAME,AGE) values (#{name},#{age})
+    </insert>-->
+</mapper>
