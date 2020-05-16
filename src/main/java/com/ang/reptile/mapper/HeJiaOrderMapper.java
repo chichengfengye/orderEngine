@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 public interface HeJiaOrderMapper {
-    int insert(HeJiaOrder heJiaOrder);
+    int insert(HeJiaOrder heJiaOrder) throws Exception;
 
     List<HeJiaOrder> getHeJiaOrders(@Param("page") Page page, @Param("active") Boolean active);
 

@@ -3,75 +3,94 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ang.reptile.mapper.HeJiaOrderMapper">
     <sql id="insertColumns">
-            created_date,
             order_info_name,
---             state,
+            state,
+            created_date,
+            order_code,
             receiver_name,
             receiver_address,
             receiver_phone,
-            order_num,
---             transport_cost,
-            order_amount,
-            preferential_amount,
-            receivableAmount,
             pay_amount,
+            commodity_item_list,
             jsonStr,
+            success_num,
+            sum_num,
             active,
             created_at
     </sql>
+
     <sql id="selectColumns">
             id,
-            created_date,
             order_info_name,
---             state,
+            state,
+            created_date,
+            order_code,
             receiver_name,
             receiver_address,
             receiver_phone,
-            order_num,
---             transport_cost,
-            order_amount,
-            preferential_amount,
-            receivableAmount,
             pay_amount,
+            commodity_item_list,
             jsonStr,
+            success_num,
+            sum_num,
             active,
             created_at,
             update_at
     </sql>
 
+    <resultMap id="heJiaOrderMap" type="com.ang.reptile.pojo.HeJiaOrder">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="order_info_name" property="orderInfoName" jdbcType="VARCHAR"/>
+        <result column="state" property="state" jdbcType="INTEGER"/>
+        <result column="created_date" property="createdDate" jdbcType="BIGINT"/>
+        <result column="order_code" property="orderCode" jdbcType="VARCHAR"/>
+        <result column="receiver_name" property="receiverName" jdbcType="VARCHAR"/>
+        <result column="receiver_address" property="receiverAddress" jdbcType="VARCHAR"/>
+        <result column="receiver_phone" property="receiverPhone" jdbcType="VARCHAR"/>
+        <result column="pay_amount" property="payAmount" jdbcType="VARCHAR"/>
+        <result column="commodity_item_list" property="commodityItemList" jdbcType="LONGVARCHAR"
+                typeHandler="com.ang.reptile.mapper.typehandler.ItemListHandler"/>
+        <result column="jsonStr" property="jsonStr" jdbcType="LONGVARCHAR"/>
+        <result column="successNum" property="jsonStr" jdbcType="INTEGER"/>
+        <result column="sumNum" property="jsonStr" jdbcType="INTEGER"/>
+        <result column="active" property="active" jdbcType="TINYINT"/>
+        <result column="created_at" property="createdAt" jdbcType="DATE"/>
+        <result column="update_at" property="updateAt" jdbcType="DATE"/>
+    </resultMap>
+
     <insert id="insert" parameterType="com.ang.reptile.pojo.HeJiaOrder">
         insert into hejia_order(<include refid="insertColumns"></include>)
         values(
-            #{createdDate},
-            #{orderInfoName},
---             #{state},
-            #{receiverName},
-            #{receiverAddress},
-            #{receiverPhone},
-            #{orderNum},
---             #{transportCost},
-            #{orderAmount},
-            #{preferentialAmount},
-            #{receivableAmount},
-            #{payAmount},
-            #{jsonStr},
-            #{active},
-            #{createdAt}
+        #{orderInfoName},
+        #{state},
+        #{createdDate},
+        #{orderCode},
+        #{receiverName},
+        #{receiverAddress},
+        #{receiverPhone},
+        #{payAmount},
+        #{commodityItemList, typeHandler=com.ang.reptile.mapper.typehandler.ItemListHandler},
+        #{jsonStr},
+        #{successNum},
+        #{sumNum},
+        #{active},
+        #{createdAt}
         )
     </insert>
 
-    <select id="getHeJiaOrders" parameterType="com.ang.reptile.model.Page" resultType="com.ang.reptile.pojo.HeJiaOrder">
-        select <include refid="selectColumns" />
+    <select id="getHeJiaOrders" parameterType="com.ang.reptile.model.Page" resultMap="heJiaOrderMap">
+        select
+        <include refid="selectColumns"/>
         from hejia_order
         where id > #{page.id}
-            and active = #{active}
+        and active = #{active} and state = 11
         order by id asc
         limit #{page.pageSize}
     </select>
 
     <update id="updateStateById" parameterType="com.ang.reptile.pojo.HeJiaOrder">
         update hejia_order
-        set active = #{active}
+        set active = #{active}, success_num = #{successNum}
         where id = #{id}
     </update>
     <!--<select id="GetUserByID" parameterType="int" resultType="com.test.springtest.dao.MUser">

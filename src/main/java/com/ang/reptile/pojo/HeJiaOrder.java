@@ -1,23 +1,27 @@
 package com.ang.reptile.pojo;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class HeJiaOrder {
     private Long id;
     private String orderInfoName;
+    private Integer state;
     private Long createdDate;
     private String orderCode;
-//    private String state;
     private String receiverName;
     private String receiverAddress;
     private String receiverPhone;
-    private Integer orderNum;//商品数量
+    //    private Integer orderNum;//商品数量
 //    private Double transportCost;//配送费用
-    private Double orderAmount;//订单总额
-    private Double preferentialAmount;//优惠金额
-    private Double receivableAmount;//应收金额; ---
+//    private Double orderAmount;//订单总额
+//    private Double preferentialAmount;//优惠金额
+//    private Double receivableAmount;//应收金额; ---
     private Double payAmount;//实收金额;
+    private ArrayList<ItemList> commodityItemList;
     private String jsonStr;
+    private Integer successNum = 0;
+    private Integer sumNum = 0;
     private Boolean active = true;
     private Date createdAt;
     private Date updateAt;
@@ -36,6 +40,14 @@ public class HeJiaOrder {
 
     public void setOrderInfoName(String orderInfoName) {
         this.orderInfoName = orderInfoName;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
     }
 
     public Long getCreatedDate() {
@@ -84,7 +96,7 @@ public class HeJiaOrder {
     public void setReceiverPhone(String receiverPhone) {
         this.receiverPhone = receiverPhone;
     }
-
+/*
     public Integer getOrderNum() {
         return orderNum;
     }
@@ -92,7 +104,7 @@ public class HeJiaOrder {
     public void setOrderNum(Integer orderNum) {
         this.orderNum = orderNum;
     }
-/*
+
 
     public Double getTransportCost() {
         return transportCost;
@@ -103,6 +115,7 @@ public class HeJiaOrder {
     }
 */
 
+/*
     public Double getOrderAmount() {
         return orderAmount;
     }
@@ -126,6 +139,7 @@ public class HeJiaOrder {
     public void setReceivableAmount(Double receivableAmount) {
         this.receivableAmount = receivableAmount;
     }
+*/
 
     public Double getPayAmount() {
         return payAmount;
@@ -135,12 +149,36 @@ public class HeJiaOrder {
         this.payAmount = payAmount;
     }
 
+    public ArrayList<ItemList> getCommodityItemList() {
+        return commodityItemList;
+    }
+
+    public void setCommodityItemList(ArrayList<ItemList> commodityItemList) {
+        this.commodityItemList = commodityItemList;
+    }
+
     public String getJsonStr() {
         return jsonStr;
     }
 
     public void setJsonStr(String jsonStr) {
         this.jsonStr = jsonStr;
+    }
+
+    public Integer getSuccessNum() {
+        return successNum;
+    }
+
+    public void setSuccessNum(Integer successNum) {
+        this.successNum = successNum;
+    }
+
+    public Integer getSumNum() {
+        return sumNum;
+    }
+
+    public void setSumNum(Integer sumNum) {
+        this.sumNum = sumNum;
     }
 
     public Boolean getActive() {
@@ -175,11 +213,11 @@ public class HeJiaOrder {
                 ", receiverName='" + receiverName + '\'' +
                 ", receiverAddress='" + receiverAddress + '\'' +
                 ", receiverPhone='" + receiverPhone + '\'' +
-                ", orderNum=" + orderNum +
+//                ", orderNum=" + orderNum +
 //                ", transportCost=" + transportCost +
-                ", orderAmount=" + orderAmount +
-                ", preferentialAmount=" + preferentialAmount +
-                ", receivableAmount=" + receivableAmount +
+//                ", orderAmount=" + orderAmount +
+//                ", preferentialAmount=" + preferentialAmount +
+//                ", receivableAmount=" + receivableAmount +
                 ", payAmount=" + payAmount +
                 ", jsonStr='" + jsonStr + '\'' +
                 ", active=" + active +

@@ -44,6 +44,10 @@ public class DataBus<T> {
     public void setData(T data) {
         this.data = data;
     }
+    public static DataBus failure(Integer code, String msg) {
+        DataBus message = new DataBus(code, msg, null);
+        return message;
+    }
 
     public static DataBus failure(String msg) {
         DataBus message = new DataBus(-1, msg, null);
@@ -54,13 +58,16 @@ public class DataBus<T> {
         DataBus message = new DataBus(-1, "error", null);
         return message;
     }
-    public static DataBus success(String msg) {
-        DataBus message = new DataBus(1, msg, null);
+    public static DataBus success(Object data) {
+        DataBus message = new DataBus(1, null, data);
         return message;
     }
-
-    public static DataBus success() {
-        DataBus message = new DataBus(1, "success", null);
+    public static DataBus SUCCESS() {
+        DataBus message = new DataBus(1, SUCCESS_MSG, null);
+        return message;
+    }
+    public static DataBus SUCCESS(String msg) {
+        DataBus message = new DataBus(1, msg, null);
         return message;
     }
 }

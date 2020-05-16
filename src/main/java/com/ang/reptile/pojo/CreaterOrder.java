@@ -2,13 +2,14 @@ package com.ang.reptile.pojo;
 
 public class CreaterOrder {
     private String ordertype;//服务项目
+    private Integer number_0;//该商品数量
     private String servicemode = "上门";//服务方式 ,如 上门
     private Integer guarantee = 1;//工单类型 编码 1
     private String guaranteeName = "保内";//工单类型，文字描述
     private String originname;//工单来源 originno
     private String factorynumber;//原厂单号
     private String repairdate;//上门时间: 2020-05-05 15:36:09
-    private Double price;
+    private Double price;//上门收费
     private String username;
     private String mobile;//用户电话
     private String province;// 1
@@ -27,6 +28,14 @@ public class CreaterOrder {
 
     public void setOrdertype(String ordertype) {
         this.ordertype = ordertype;
+    }
+
+    public Integer getNumber_0() {
+        return number_0;
+    }
+
+    public void setNumber_0(Integer number_0) {
+        this.number_0 = number_0;
     }
 
     public String getServicemode() {

@@ -6,7 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.ang.reptile.config.HttpConfig;
 
 public class ConfigReader {
-    private static final String path = "E:\\projects_2\\order\\config.json";
+    private static final String path = "E:\\projects_2\\order\\upstream_http.json";
 
     public static HttpConfig getConfig(String path) {
         FileReader fileReader = new FileReader(path);

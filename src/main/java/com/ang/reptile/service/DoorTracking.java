@@ -6,13 +6,16 @@ import com.ang.reptile.mapper.HeJiaOrderMapper;
 import com.ang.reptile.model.DataBus;
 import com.ang.reptile.model.Page;
 import com.ang.reptile.pojo.HeJiaOrder;
+import com.ang.reptile.pojo.ItemList;
 import com.ang.reptile.util.*;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +41,7 @@ public class DoorTracking {
      * @return
      */
     public DataBus<List<String>> loopDoorTrackingData() {
-        HttpConfig httpConfig = ConfigReader.getConfig("E:\\projects_2\\order\\config.json");
+        HttpConfig httpConfig = ConfigReader.getConfig("E:\\projects_2\\order\\upstream_http.json");
 
         HashMap<String, String> cookies = httpConfig.getCookies();
         if (cookies != null && cookies.size() > 0) {
@@ -92,7 +95,7 @@ public class DoorTracking {
         logger.info("+++++++++++共获取苏宁 " + allDataSize + "条数据+++++++++++++");
         logger.info("+++++++++++共插入数据库 " + allDBItemSize + "条记录+++++++++++++");
 
-        DataBus<List<String>> dataBus = DataBus.success();
+        DataBus<List<String>> dataBus = DataBus.SUCCESS();
 
         return dataBus;
     }
@@ -143,7 +146,7 @@ public class DoorTracking {
                 .build();
         try (Response response = okHttpClient.newCall(request).execute()) {
             String resultStr = response.body().string();
-            DataBus<String> dataBus = DataBus.success();
+            DataBus<String> dataBus = DataBus.SUCCESS();
             dataBus.setData(resultStr);
             return dataBus;
 
@@ -161,8 +164,13 @@ public class DoorTracking {
             HeJiaOrder order = JSON.parseObject(data, HeJiaOrder.class);
             try {
                 order.setJsonStr(data);
+                List<ItemList> list = order.getCommodityItemList();
+                order.setSumNum(list == null ? 0 : list.size());
                 mapper.insert(order);
                 success++;
+            } catch (DuplicateKeyException se) {
+//                se.printStackTrace();
+                logger.error("==============插入数据重复！！！=================", order.getOrderCode());
             } catch (Exception e) {
                 e.printStackTrace();
                 logger.error("==============插入数据库出错！！！=================", order.toString());
