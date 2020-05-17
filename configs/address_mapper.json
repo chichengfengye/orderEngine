@@ -1,8 +1,12 @@
 {
   "水郡长安": {
-    "city": {
+    "province": {
       "name": "北京市",
       "code": 1
+    },
+    "city": {
+      "name": "北京市",
+      "code": 2
     },
     "county": {
       "name": "朝阳区",
@@ -14,9 +18,13 @@
     }
   },
   "东亚上北": {
-    "city": {
+    "province": {
       "name": "北京市",
       "code": 1
+    },
+    "city": {
+      "name": "北京市",
+      "code": 2
     },
     "county": {
       "name": "昌平区",

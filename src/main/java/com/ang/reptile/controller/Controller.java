@@ -1,11 +1,9 @@
 package com.ang.reptile.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.ang.reptile.model.DataBus;
 import com.ang.reptile.model.Message;
-import com.ang.reptile.service.DoorTracking;
-import com.ang.reptile.service.OrderCreater;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ang.reptile.service.GetOrderService;
+import com.ang.reptile.service.CreateOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,15 +15,15 @@ import java.util.List;
 @RestController
 public class Controller {
     @Autowired
-    private DoorTracking doorTracking;
+    private GetOrderService getOrderService;
     @Autowired
-    private OrderCreater orderCreater;
+    private CreateOrderService createOrderService;
 
 
     @RequestMapping("/getData")
     public Message getData() {
         try {
-            DataBus<List<String>> dataBus = doorTracking.loopDoorTrackingData();
+            DataBus<List<String>> dataBus = getOrderService.loopDoorTrackingData();
             if (dataBus.getCode() == DataBus.SUCCESS_CODE) {
                 return Message.success(dataBus.getData());
             }
@@ -44,6 +42,6 @@ public class Controller {
 
     @RequestMapping("/createOrder")
     public Object createOrder() {
-        return orderCreater.createOrder();
+        return createOrderService.createOrder();
     }
 }

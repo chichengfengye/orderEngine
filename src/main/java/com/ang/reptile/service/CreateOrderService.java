@@ -11,7 +11,7 @@ import com.ang.reptile.pojo.CreaterOrder;
 import com.ang.reptile.pojo.HeJiaOrder;
 import com.ang.reptile.pojo.ItemList;
 import com.ang.reptile.util.CityUtil;
-import com.ang.reptile.util.ConfigReader;
+import com.ang.reptile.config.ConfigReader;
 import com.ang.reptile.util.QueryDataMapUtil;
 import okhttp3.*;
 import org.slf4j.Logger;
@@ -24,14 +24,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class OrderCreater {
-    private Logger logger = LoggerFactory.getLogger(OrderCreater.class);
+public class CreateOrderService {
+    private Logger logger = LoggerFactory.getLogger(CreateOrderService.class);
 
     @Autowired
     private HeJiaOrderMapper mapper;
+    @Autowired
+    private OrderTypeService orderTypeService;
+
     private CityUtil cityUtil;
     private HttpConfig httpConfig;
-    private JSONObject orderTypeConfig;
+
     private HashMap<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
     private HashMap<String, String> cookies = new HashMap<>();
     private HashMap<String, String> headers = new HashMap<>();
@@ -81,12 +84,12 @@ public class OrderCreater {
     }
 
     private void loadConfigs() {
-        httpConfig = ConfigReader.getConfig("E:\\projects_2\\order\\downstream_http.json");
+        this.httpConfig = ConfigReader.getConfig( "downstream_http.json");
         this.headers = httpConfig.getHeaders();
         this.cookies = httpConfig.getCookies();
 
-        cityUtil.load("E:\\projects_2\\order\\address_mapper.json");
-        this.orderTypeConfig = ConfigReader.getJSONConfig("E:\\projects_2\\order\\orderType_mapper.json");
+        cityUtil.load( "address_mapper.json");
+
     }
 
     //发送请求到帮家
@@ -190,7 +193,7 @@ public class OrderCreater {
         int res = mapper.updateStateById(heJiaOrder);
 
         //响应结果
-        return  new DataBus(flag, message, null);
+        return new DataBus(flag, message, null);
     }
 
     private DataBus<List<CreaterOrder>> truncateOrder(HeJiaOrder heJiaOrder) {
@@ -203,12 +206,13 @@ public class OrderCreater {
         String orderInfoName = heJiaOrder.getOrderInfoName();
         Double payAmount = heJiaOrder.getPayAmount();
         List<ItemList> itemLists = heJiaOrder.getCommodityItemList();
+        String code = heJiaOrder.getOrderCode();
 
 
         //目标数据
         Date repaireDate = getRepairedDate(buyDate);//repaireDateCalender.getTime();
         //todo bug
-        String orderType ="1";// orderTypeConfig.getJSONObject(orderInfoName).getString("code");//服务项目
+        String orderType = orderTypeService.getServiceCode(orderInfoName);//;// //服务项目
         Address addressConfig = CityUtil.getAddress(address);
         if (addressConfig == null) {
             logger.error("===>找不到address【{}】的配置省市地址！", address);
@@ -218,6 +222,7 @@ public class OrderCreater {
         String city = addressConfig.getCity().getCode();
         String county = addressConfig.getCounty().getCode();
         String town = addressConfig.getTown().getCode();
+        String note = "订单名称："+orderInfoName + "\n 所属合家订单编码:" + code;
 
         for (ItemList itemList : itemLists) {
             Double amount = itemList.getAmount();
@@ -232,7 +237,7 @@ public class OrderCreater {
             createrOrder.setOrdertype(orderType);
             createrOrder.setServicemode("上门");
             createrOrder.setGuarantee(1);
-            createrOrder.setOriginname("自接单");
+            createrOrder.setOriginname(addressConfig.getVillage());//工单来源 指的是哪个小区来的工单--2020年5月17日
             createrOrder.setFactorynumber(orderInfoName);
             createrOrder.setPrice(0d);
             createrOrder.setRepairdate(repairDateFormat.format(repaireDate));
@@ -244,12 +249,12 @@ public class OrderCreater {
             createrOrder.setTown(town);
             createrOrder.setAddress(address);
             createrOrder.setMbuyprice(amount);
-            createrOrder.setCreatename("李昂");
+            createrOrder.setCreatename("靳丰");
             createrOrder.setMbuydate(buyDateFormat.format(buyDate));
+            createrOrder.setNote(note);
 
             orders.add(createrOrder);
         }
-
 
 
         return DataBus.success(orders);
@@ -260,6 +265,7 @@ public class OrderCreater {
      * 1. 等于下单时间的时间+2天
      * 2. 下单时间过了18点，就要+3
      * 3. 上门时间的小时可以随便写，我这里就默认是0了
+     *
      * @param buyDate
      * @return
      */
@@ -268,7 +274,7 @@ public class OrderCreater {
         repaireDateCalender.setTime(buyDate);
         //检查是否>=18点
         int hour = repaireDateCalender.get(Calendar.HOUR_OF_DAY);
-        boolean isOffWork  = false;
+        boolean isOffWork = false;
         if (hour >= 18) {
             isOffWork = true;
         }

@@ -1,6 +1,7 @@
 package com.ang.reptile.service;
 
 import com.alibaba.fastjson.JSON;
+import com.ang.reptile.config.ConfigReader;
 import com.ang.reptile.config.HttpConfig;
 import com.ang.reptile.mapper.HeJiaOrderMapper;
 import com.ang.reptile.model.DataBus;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,10 +23,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class DoorTracking {
+public class GetOrderService {
     @Autowired
     private HeJiaOrderMapper mapper;
-    private Logger logger = LoggerFactory.getLogger(DoorTracking.class);
+    private Logger logger = LoggerFactory.getLogger(GetOrderService.class);
     private String reqUrl = "";
     private static final int pageSize = 15;
     private HashMap<String, String> headers = new HashMap<>();
@@ -41,7 +41,7 @@ public class DoorTracking {
      * @return
      */
     public DataBus<List<String>> loopDoorTrackingData() {
-        HttpConfig httpConfig = ConfigReader.getConfig("E:\\projects_2\\order\\upstream_http.json");
+        HttpConfig httpConfig = ConfigReader.getConfig("upstream_http.json");
 
         HashMap<String, String> cookies = httpConfig.getCookies();
         if (cookies != null && cookies.size() > 0) {

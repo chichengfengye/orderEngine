@@ -3,7 +3,7 @@ package com.ang.reptile.util;
 import com.alibaba.fastjson.JSONObject;
 import com.ang.reptile.model.Address;
 import com.ang.reptile.model.NameCode;
-import com.ang.reptile.util.ConfigReader;
+import com.ang.reptile.config.ConfigReader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,13 +34,22 @@ public class CityUtil {
     public static Address getAddress(String address) {
         String blockName = getBlockName(address);
         if (blockName != null) {
+            for (String key : addressConfig.keySet()) {
+                if (key.contains(address)||address.contains(key)) {
+                    address = key;
+                }
+            }
+            if (address == null) {
+                return null;
+            }
             JSONObject jsonObject = addressConfig.getJSONObject(address);
-            NameCode province = jsonObject.getObject("city", NameCode.class);
+            NameCode province = jsonObject.getObject("province", NameCode.class);
             NameCode city = jsonObject.getObject("city", NameCode.class);
             NameCode county = jsonObject.getObject("county", NameCode.class);
             NameCode town = jsonObject.getObject("town", NameCode.class);
-            return new Address(province, city, county, town);
+            return new Address(address, province, city, county, town);
         }
         return null;
     }
+
 }

@@ -20,6 +20,7 @@ public class CreaterOrder {
     private Double mbuyprice;//购买价格 --对应实收金额
     private String mbuydate;//购买日期: 2020-05-05
     private String createname;
+    private String note;//备注
 
 
     public String getOrdertype() {
@@ -172,5 +173,13 @@ public class CreaterOrder {
 
     public void setCreatename(String createname) {
         this.createname = createname;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }

@@ -5,8 +5,10 @@ public class Address {
     private NameCode city;
     private NameCode county;
     private NameCode town;
+    private String village;
 
-    public Address(NameCode province, NameCode city, NameCode county, NameCode town) {
+    public Address(String village, NameCode province, NameCode city, NameCode county, NameCode town) {
+        this.village = village;
         this.province = province;
         this.city = city;
         this.county = county;
@@ -43,5 +45,13 @@ public class Address {
 
     public void setTown(NameCode town) {
         this.town = town;
+    }
+
+    public String getVillage() {
+        return village;
+    }
+
+    public void setVillage(String village) {
+        this.village = village;
     }
 }

@@ -1,6 +1,6 @@
 package com.ang.reptile;
 
-import com.ang.reptile.service.DoorTracking;
+import com.ang.reptile.service.GetOrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ public class ReptileApplicationRunner implements ApplicationRunner {
     private Logger logger = LoggerFactory.getLogger(ReptileApplicationRunner.class);
 
     @Autowired
-    private DoorTracking doorTracking;
+    private GetOrderService getOrderService;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {

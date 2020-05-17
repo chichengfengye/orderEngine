@@ -7,16 +7,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataService {
     @Autowired
-    private DoorTracking doorTracking;
+    private GetOrderService getOrderService;
     @Autowired
-    private OrderCreater orderCreater;
+    private CreateOrderService createOrderService;
 
     public DataBus<Object> process() {
         //获取数据并入库
-        DataBus dataBus = doorTracking.loopDoorTrackingData();
+        DataBus dataBus = getOrderService.loopDoorTrackingData();
         if (dataBus.getCode() == DataBus.SUCCESS_CODE) {
             //读取数据发送请求创建订单到帮家
-            dataBus = orderCreater.createOrder();
+            dataBus = createOrderService.createOrder();
             return dataBus;
         }
         return dataBus;
