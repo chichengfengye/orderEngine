@@ -14,11 +14,11 @@ public class DataService {
     public DataBus<Object> process() {
         //获取数据并入库
         DataBus dataBus = getOrderService.loopDoorTrackingData();
-        if (dataBus.getCode() == DataBus.SUCCESS_CODE) {
+      /*  if (dataBus.getCode() == DataBus.SUCCESS_CODE) {
             //读取数据发送请求创建订单到帮家
             dataBus = createOrderService.createOrder();
             return dataBus;
-        }
+        }*/
         return dataBus;
     }
 }

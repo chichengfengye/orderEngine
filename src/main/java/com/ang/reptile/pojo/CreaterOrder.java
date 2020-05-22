@@ -1,6 +1,7 @@
 package com.ang.reptile.pojo;
 
 public class CreaterOrder {
+    private String heJiaOrderCode;
     private String ordertype;//服务项目
     private Integer number_0;//该商品数量
     private String servicemode = "上门";//服务方式 ,如 上门
@@ -22,6 +23,13 @@ public class CreaterOrder {
     private String createname;
     private String note;//备注
 
+    public String getHeJiaOrderCode() {
+        return heJiaOrderCode;
+    }
+
+    public void setHeJiaOrderCode(String heJiaOrderCode) {
+        this.heJiaOrderCode = heJiaOrderCode;
+    }
 
     public String getOrdertype() {
         return ordertype;

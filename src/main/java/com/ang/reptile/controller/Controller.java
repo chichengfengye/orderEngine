@@ -44,4 +44,9 @@ public class Controller {
     public Object createOrder() {
         return createOrderService.createOrder();
     }
+
+    @RequestMapping("/updateCookie")
+    public Object setCookie(String key, String cookie) {
+        return createOrderService.updateCookie(key, cookie);
+    }
 }

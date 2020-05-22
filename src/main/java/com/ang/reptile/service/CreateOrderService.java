@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.xml.crypto.Data;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,27 +42,37 @@ public class CreateOrderService {
     SimpleDateFormat repairDateFormat = new SimpleDateFormat("yy:MM:dd HH:mm:ss");
     SimpleDateFormat buyDateFormat = new SimpleDateFormat("yy-MM-dd");
 
-    public DataBus createOrder() {
+    public CreateOrderService() {
         loadConfigs();
+    }
+
+    public DataBus createOrder() {
 
         DataBus conclude = null;
-        Long errorNum = 0L;
-        Long successNum = 0L;
-        Long id = 0L;
+        long errorNum = 0L;
+        long successNum = 0L;
+        long totalOrder = 0l;
+        long id = 0L;
         DBQueryPage page = new DBQueryPage();
         page.setPageSize(30);
+
+
         //轮循获取数据
         while (true) {
             page.setId(id);
             List<HeJiaOrder> hejiaOrders = mapper.getHeJiaOrders(page, true);
             if (hejiaOrders == null || hejiaOrders.size() == 0) {
-                successNum = 1l;
+                if (totalOrder == 0l) {
+                    logger.info("没有合家订单用于创建！");
+                }
                 break;
             } else {
                 id = hejiaOrders.get(hejiaOrders.size() - 1).getId();
                 for (HeJiaOrder hejiaOrder : hejiaOrders) {
+                    totalOrder++;
                     DataBus result = postToBangJia(hejiaOrder);
                     if (result.getCode() != DataBus.SUCCESS_CODE) {
+                        logger.error(result.getMsg());
                         errorNum++;
                     } else {
                         successNum++;
@@ -70,10 +81,13 @@ public class CreateOrderService {
             }
         }
 
-        if (errorNum > 0 && successNum == 0) {
-            conclude = DataBus.failure();
-        } else if (errorNum == 0 && successNum > 0) {
+
+        if (totalOrder == 0l) {
+            conclude = DataBus.SUCCESS("没有合家订单需要创建！");
+        } else if (successNum == totalOrder) {
             conclude = DataBus.SUCCESS();
+        } else if (successNum == 0l) {
+            conclude = DataBus.failure();
         } else {
             conclude = new DataBus(2, "部分成功【" + successNum + "】，部分失败【" + errorNum
                     + "】！", null);
@@ -84,12 +98,21 @@ public class CreateOrderService {
     }
 
     private void loadConfigs() {
-        this.httpConfig = ConfigReader.getConfig( "downstream_http.json");
+        this.httpConfig = ConfigReader.getConfig("downstream_http.json");
         this.headers = httpConfig.getHeaders();
         this.cookies = httpConfig.getCookies();
 
-        cityUtil.load( "address_mapper.json");
+        cityUtil.load("address_mapper.json");
 
+    }
+
+    public boolean updateCookie(String key, String value) {
+        if (this.cookies == null) {
+            this.cookies = new HashMap<>();
+        }
+
+        this.cookies.put(key, value);
+        return true;
     }
 
     //发送请求到帮家
@@ -102,6 +125,9 @@ public class CreateOrderService {
             return dataBus;
         }
         List<CreaterOrder> createrOrders = dataBus.getData();
+
+        logger.info("==>本次创建帮家订单目标数量：{}", createrOrders.size());
+
         int successItem = 0;
         int itemSum = createrOrders.size();
         for (CreaterOrder createrOrder : createrOrders) {
@@ -155,7 +181,7 @@ public class CreateOrderService {
                 resultStr = response.body().string();
 
             } catch (Exception e) {
-                logger.error("============= 创建订单失败！============");
+                logger.error("============= 创建订单失败！订单所属合家订单的编码 {}============", createrOrder.getHeJiaOrderCode());
                 e.printStackTrace();
                 return DataBus.failure();
             }
@@ -168,10 +194,12 @@ public class CreateOrderService {
                 } catch (Exception e) {
                     e.printStackTrace();
                     flag = 2;
-                    message = "创建订单成功！但是更新数据库失败！orderId【" + heJiaOrder.getId() + "】";
+                    message = "创建订单成功！但是更新数据库失败！合家orderId【" + heJiaOrder.getId() + "】合家orderCode " + "createrOrder.getHeJiaOrderCode()";
                     logger.error(message);
                 }
             } else {
+                message = resultStr;
+                logger.info(message);
                 flag = 0;
             }
         }
@@ -192,12 +220,15 @@ public class CreateOrderService {
 
         int res = mapper.updateStateById(heJiaOrder);
 
+        logger.info("==>实际创建帮家订单数量：{}", successItem);
+
         //响应结果
         return new DataBus(flag, message, null);
     }
 
     private DataBus<List<CreaterOrder>> truncateOrder(HeJiaOrder heJiaOrder) {
         List<CreaterOrder> orders = new ArrayList<>();
+
         //原数据
         Date buyDate = new Date(heJiaOrder.getCreatedDate());
         String address = heJiaOrder.getReceiverAddress();
@@ -222,7 +253,7 @@ public class CreateOrderService {
         String city = addressConfig.getCity().getCode();
         String county = addressConfig.getCounty().getCode();
         String town = addressConfig.getTown().getCode();
-        String note = "订单名称："+orderInfoName + "\n 所属合家订单编码:" + code;
+        String note = "订单名称：" + orderInfoName + "\n 所属合家订单编码:" + code;
 
         for (ItemList itemList : itemLists) {
             Double amount = itemList.getAmount();
@@ -233,6 +264,7 @@ public class CreateOrderService {
             String summary = itemList.getSummary();
 
             CreaterOrder createrOrder = new CreaterOrder();
+            createrOrder.setHeJiaOrderCode(code);
             createrOrder.setNumber_0(commodityInfoNum);
             createrOrder.setOrdertype(orderType);
             createrOrder.setServicemode("上门");
