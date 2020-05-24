@@ -62,11 +62,11 @@ public class DataBus<T> {
         DataBus message = new DataBus(1, null, data);
         return message;
     }
-    public static DataBus SUCCESS() {
+    public static DataBus success() {
         DataBus message = new DataBus(1, SUCCESS_MSG, null);
         return message;
     }
-    public static DataBus SUCCESS(String msg) {
+    public static DataBus success(String msg) {
         DataBus message = new DataBus(1, msg, null);
         return message;
     }

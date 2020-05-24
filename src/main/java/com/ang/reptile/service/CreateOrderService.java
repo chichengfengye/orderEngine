@@ -1,6 +1,5 @@
 package com.ang.reptile.service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.ang.reptile.code.MessageCode;
 import com.ang.reptile.config.HttpConfig;
 import com.ang.reptile.dto.DBQueryPage;
@@ -13,16 +12,16 @@ import com.ang.reptile.pojo.ItemList;
 import com.ang.reptile.util.CityUtil;
 import com.ang.reptile.config.ConfigReader;
 import com.ang.reptile.util.QueryDataMapUtil;
+import com.ang.reptile.util.http.MyHttpRequestBuilder;
+import com.ang.reptile.util.http.Validater;
 import okhttp3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.xml.crypto.Data;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class CreateOrderService {
@@ -32,6 +31,7 @@ public class CreateOrderService {
     private HeJiaOrderMapper mapper;
     @Autowired
     private OrderTypeService orderTypeService;
+    private boolean retry = false;
 
     private CityUtil cityUtil;
     private HttpConfig httpConfig;
@@ -46,16 +46,18 @@ public class CreateOrderService {
         loadConfigs();
     }
 
-    public DataBus createOrder() {
-
-        DataBus conclude = null;
-        long errorNum = 0L;
+    /**
+     * 第一次创建上游订单到下游
+     *
+     * @return
+     */
+    public DataBus<HashMap<String, Integer>> createFirst() {
+        DataBus conclude;
         long successNum = 0L;
         long totalOrder = 0l;
         long id = 0L;
         DBQueryPage page = new DBQueryPage();
         page.setPageSize(30);
-
 
         //轮循获取数据
         while (true) {
@@ -73,7 +75,6 @@ public class CreateOrderService {
                     DataBus result = postToBangJia(hejiaOrder);
                     if (result.getCode() != DataBus.SUCCESS_CODE) {
                         logger.error(result.getMsg());
-                        errorNum++;
                     } else {
                         successNum++;
                     }
@@ -83,18 +84,33 @@ public class CreateOrderService {
 
 
         if (totalOrder == 0l) {
-            conclude = DataBus.SUCCESS("没有合家订单需要创建！");
+            conclude = DataBus.failure(MessageCode.Code.UPSTREAM_ACTIVEORDER_NOTFOUND, MessageCode.Message.UPSTREAM_ACTIVEORDER_NOTFOUND);
         } else if (successNum == totalOrder) {
-            conclude = DataBus.SUCCESS();
+            conclude = DataBus.success();
         } else if (successNum == 0l) {
             conclude = DataBus.failure();
         } else {
-            conclude = new DataBus(2, "部分成功【" + successNum + "】，部分失败【" + errorNum
-                    + "】！", null);
+            conclude = new DataBus(MessageCode.Code.CREATE_ORDER_PART_SUCCESS,
+                    MessageCode.Message.CREATE_ORDER_PART_SUCCESS,
+                    null);
         }
 
 
         return conclude;
+    }
+
+    public DataBus createOrder() {
+        DataBus<HashMap<String, Integer>> dataBus = createFirst();
+        int code = dataBus.getCode();
+        if (code == DataBus.SUCCESS_CODE) {
+            return dataBus;
+        } else {
+            if (retry) {
+                return retryCreateOrder();
+            } else {
+                return dataBus;
+            }
+        }
     }
 
     private void loadConfigs() {
@@ -119,100 +135,30 @@ public class CreateOrderService {
     public DataBus postToBangJia(HeJiaOrder heJiaOrder) {
         int flag = 0;//0 失败 1 成功 2 请求成功但是更新数据库失败！
         String message = null;
-        //todo 创建http客户端
         DataBus<List<CreaterOrder>> dataBus = truncateOrder(heJiaOrder);
         if (dataBus.getCode() != DataBus.SUCCESS_CODE) {
             return dataBus;
         }
         List<CreaterOrder> createrOrders = dataBus.getData();
-
-        logger.info("==>本次创建帮家订单目标数量：{}", createrOrders.size());
-
         int successItem = 0;
         int itemSum = createrOrders.size();
+        logger.info("==>本次需要创建帮家订单数量：{}", itemSum);
+
         for (CreaterOrder createrOrder : createrOrders) {
-            //        MediaType mediaType = MediaType.parse("multipart/form-data");
-            FormBody.Builder builder = new FormBody.Builder();
+            MyHttpRequestBuilder myHttpRequestBuilder = MyHttpRequestBuilder.createFormReqInstance(Validater.BANGJIA_HTML_VALIDATER);
             HashMap<String, String> urlEncodedMap = QueryDataMapUtil.getQueryDataMap(createrOrder, CreaterOrder.class);
-            if (urlEncodedMap != null && urlEncodedMap.size() >= 0) {
-                for (Map.Entry<String, String> stringObjectEntry : urlEncodedMap.entrySet()) {
-                    String name = stringObjectEntry.getKey();
-                    String value = stringObjectEntry.getValue();
-                    builder.add(name, value);
-                }
-            }
-            FormBody body = builder.build();
-            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder().cookieJar(new CookieJar() {
-                @Override
-                public void saveFromResponse(HttpUrl httpUrl, List<Cookie> list) {
-                    cookieStore.put(httpUrl, list);
-                }
-
-                @Override
-                public List<Cookie> loadForRequest(HttpUrl httpUrl) {
-                    List<Cookie> cookies = cookieStore.get(httpUrl);
-                    return cookies != null ? cookies : new ArrayList<Cookie>();
-
-                }
-            });
-            OkHttpClient okHttpClient = clientBuilder.build();
-
-            //cookie
-            String cookieValue = cookies.entrySet().stream()
-                    .map(entry -> entry.getKey() + "=" + entry.getValue()).collect(Collectors.joining(";"));
-            //header
-            Headers.Builder headersBuilder = new Headers.Builder();
-            headersBuilder.add("Cookie", cookieValue);
-            for (Map.Entry<String, String> header : this.headers.entrySet()) {
-                headersBuilder.add(header.getKey(), header.getValue());
-            }
-            Headers headers = headersBuilder.build();
-
-            //do req
-            Request request = new Request.Builder()
-                    .url(httpConfig.getUrl())
-                    .post(body)
-                    .headers(headers)
-                    .build();
-
-            //发送请求
-            String resultStr = null;
-            try (Response response = okHttpClient.newCall(request).execute()) {
-                resultStr = response.body().string();
-
-            } catch (Exception e) {
-                logger.error("============= 创建订单失败！订单所属合家订单的编码 {}============", createrOrder.getHeJiaOrderCode());
-                e.printStackTrace();
-                return DataBus.failure();
-            }
-
-            //解析结果 判断是否有字段 “新增成功”
-            if (resultStr != null && resultStr.contains("新增成功")) {
-                //更新数据库的active字段
-                try {
-                    successItem++;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    flag = 2;
-                    message = "创建订单成功！但是更新数据库失败！合家orderId【" + heJiaOrder.getId() + "】合家orderCode " + "createrOrder.getHeJiaOrderCode()";
-                    logger.error(message);
-                }
+            myHttpRequestBuilder.addParameters(urlEncodedMap);
+            myHttpRequestBuilder.addCookies(this.cookies);
+            myHttpRequestBuilder.addHeaders(this.headers);
+            myHttpRequestBuilder.build(httpConfig.getUrl());
+            DataBus<String> reqResult = myHttpRequestBuilder.execute();
+            if (reqResult.getCode() == DataBus.SUCCESS_CODE) {
+                successItem++;
             } else {
-                message = resultStr;
-                logger.info(message);
-                flag = 0;
-            }
-        }
+                logger.error("============= 创建订单失败！订单所属合家订单的编码 {}============", createrOrder.getHeJiaOrderCode());
+                //todo 将错误的订单入库
 
-        if (itemSum == successItem) {
-            flag = 1;
-            message = "成功！";
-        } else if (successItem > 0 && itemSum != successItem) {
-            message = "部分成功部分失败！";
-            flag = 2;
-        } else {
-            message = "全部失败！";
-            flag = 0;
+            }
         }
 
         heJiaOrder.setActive(false);
@@ -220,10 +166,25 @@ public class CreateOrderService {
 
         int res = mapper.updateStateById(heJiaOrder);
 
-        logger.info("==>实际创建帮家订单数量：{}", successItem);
+        logger.info("==>成功创建帮家订单数量：{}", successItem);
 
         //响应结果
         return new DataBus(flag, message, null);
+    }
+
+    /**
+     * 重试创建订单
+     *
+     * @return
+     */
+    public DataBus retryCreateOrder() {
+        //todo 查询失败的下级订单
+
+        //todo 用查询的结果再次创建订单
+
+        //todo 仅仅重试一次，失败则单独记录重试失败的日志
+
+        return DataBus.failure();
     }
 
     private DataBus<List<CreaterOrder>> truncateOrder(HeJiaOrder heJiaOrder) {

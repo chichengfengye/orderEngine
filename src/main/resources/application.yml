@@ -12,5 +12,7 @@ mybatis:
 logging:
   level:
     root: info
+  file:
+    path: D:/projs/logs/order
 
 config-path: D:/projs/order/configs

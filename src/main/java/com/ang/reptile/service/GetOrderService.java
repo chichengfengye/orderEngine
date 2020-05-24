@@ -95,7 +95,7 @@ public class GetOrderService {
         logger.info("+++++++++++共获取苏宁 " + allDataSize + "条数据+++++++++++++");
         logger.info("+++++++++++共插入数据库 " + allDBItemSize + "条记录+++++++++++++");
 
-        DataBus<List<String>> dataBus = DataBus.SUCCESS();
+        DataBus<List<String>> dataBus = DataBus.success();
 
         return dataBus;
     }
@@ -146,7 +146,7 @@ public class GetOrderService {
                 .build();
         try (Response response = okHttpClient.newCall(request).execute()) {
             String resultStr = response.body().string();
-            DataBus<String> dataBus = DataBus.SUCCESS();
+            DataBus<String> dataBus = DataBus.success();
             dataBus.setData(resultStr);
             return dataBus;
 
