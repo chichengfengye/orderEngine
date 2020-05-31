@@ -1,3 +1,31 @@
+create table bangjia_order(
+    id serial primary key,
+    hejia_order_code varchar(255),
+    ordertype varchar(255),
+    number_0 integer default 0,
+    servicemode varchar(255),
+    guarantee integer,
+    guarantee_name varchar(255),
+    originname varchar(255),
+    factorynumber varchar(255),
+    repairdate varchar(255),
+    price double default 0,
+    username varchar(255),
+    mobile varchar(255),
+    province varchar(255),
+    city varchar(255),
+    county varchar(255),
+    town varchar(255),
+    address varchar(255),
+    mbuyprice double default 0,
+    mbuydate varchar(255),
+    createname varchar(255),
+    note varchar(255),
+    state integer,
+    created_at date,
+    updated_at date
+)
+
 create table hejia_order(
     id serial primary key,
     order_info_name varchar(255),

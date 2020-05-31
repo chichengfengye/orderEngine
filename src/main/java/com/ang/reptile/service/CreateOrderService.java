@@ -1,23 +1,27 @@
 package com.ang.reptile.service;
 
+import com.ang.reptile.Enum.BangJiaOrderStateEnum;
+import com.ang.reptile.Enum.UpOrDownStream;
 import com.ang.reptile.code.MessageCode;
 import com.ang.reptile.config.HttpConfig;
 import com.ang.reptile.dto.DBQueryPage;
+import com.ang.reptile.exception.HttpException;
+import com.ang.reptile.mapper.BangJiaOrderMapper;
 import com.ang.reptile.mapper.HeJiaOrderMapper;
 import com.ang.reptile.model.Address;
 import com.ang.reptile.model.DataBus;
-import com.ang.reptile.pojo.CreaterOrder;
+import com.ang.reptile.pojo.BangJiaOrder;
 import com.ang.reptile.pojo.HeJiaOrder;
 import com.ang.reptile.pojo.ItemList;
 import com.ang.reptile.util.CityUtil;
 import com.ang.reptile.config.ConfigReader;
 import com.ang.reptile.util.QueryDataMapUtil;
 import com.ang.reptile.util.http.MyHttpRequestBuilder;
-import com.ang.reptile.util.http.Validater;
-import okhttp3.*;
+import com.ang.reptile.Enum.Validater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -26,17 +30,22 @@ import java.util.*;
 @Service
 public class CreateOrderService {
     private Logger logger = LoggerFactory.getLogger(CreateOrderService.class);
+//    private Logger rtLogger = LoggerFactory.getLogger(CreateOrderService.class);
 
-    @Autowired
-    private HeJiaOrderMapper mapper;
+    //    @Autowired
+//    private HeJiaOrderMapper mapper;
     @Autowired
     private OrderTypeService orderTypeService;
+    @Autowired
+    private LoginService loginService;
+    @Autowired
+    private BangJiaOrderMapper bangJiaOrderMapper;
+    @Value("${retry}")
     private boolean retry = false;
 
     private CityUtil cityUtil;
     private HttpConfig httpConfig;
 
-    private HashMap<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
     private HashMap<String, String> cookies = new HashMap<>();
     private HashMap<String, String> headers = new HashMap<>();
     SimpleDateFormat repairDateFormat = new SimpleDateFormat("yy:MM:dd HH:mm:ss");
@@ -51,7 +60,7 @@ public class CreateOrderService {
      *
      * @return
      */
-    public DataBus<HashMap<String, Integer>> createFirst() {
+    public DataBus<HashMap<String, Integer>> createFirst() throws HttpException {
         DataBus conclude;
         long successNum = 0L;
         long totalOrder = 0l;
@@ -62,17 +71,17 @@ public class CreateOrderService {
         //轮循获取数据
         while (true) {
             page.setId(id);
-            List<HeJiaOrder> hejiaOrders = mapper.getHeJiaOrders(page, true);
-            if (hejiaOrders == null || hejiaOrders.size() == 0) {
+            List<BangJiaOrder> bangJiaOrders = bangJiaOrderMapper.processGetOrders(page, BangJiaOrderStateEnum.WAIT);
+            if (bangJiaOrders == null || bangJiaOrders.size() == 0) {
                 if (totalOrder == 0l) {
-                    logger.info("没有合家订单用于创建！");
+                    logger.info("没有帮家订单用于创建！");
                 }
                 break;
             } else {
-                id = hejiaOrders.get(hejiaOrders.size() - 1).getId();
-                for (HeJiaOrder hejiaOrder : hejiaOrders) {
+                id = bangJiaOrders.get(bangJiaOrders.size() - 1).getId();
+                for (BangJiaOrder bangJiaOrder : bangJiaOrders) {
                     totalOrder++;
-                    DataBus result = postToBangJia(hejiaOrder);
+                    DataBus result = postToBangJia(bangJiaOrder, false);
                     if (result.getCode() != DataBus.SUCCESS_CODE) {
                         logger.error(result.getMsg());
                     } else {
@@ -84,7 +93,7 @@ public class CreateOrderService {
 
 
         if (totalOrder == 0l) {
-            conclude = DataBus.failure(MessageCode.Code.UPSTREAM_ACTIVEORDER_NOTFOUND, MessageCode.Message.UPSTREAM_ACTIVEORDER_NOTFOUND);
+            conclude = DataBus.failure(MessageCode.Code.BANGJIA_ORDER_NOT_FOUND, MessageCode.Message.BANGJIA_ORDER_NOT_FOUND);
         } else if (successNum == totalOrder) {
             conclude = DataBus.success();
         } else if (successNum == 0l) {
@@ -99,10 +108,13 @@ public class CreateOrderService {
         return conclude;
     }
 
-    public DataBus createOrder() {
+    public DataBus createOrder() throws HttpException {
         DataBus<HashMap<String, Integer>> dataBus = createFirst();
         int code = dataBus.getCode();
         if (code == DataBus.SUCCESS_CODE) {
+            return dataBus;
+        }
+        if (code == MessageCode.Code.BANGJIA_ORDER_NOT_FOUND) {
             return dataBus;
         } else {
             if (retry) {
@@ -122,6 +134,15 @@ public class CreateOrderService {
 
     }
 
+    public boolean updateCookies(Map<String, String> cookies) {
+        if (this.cookies == null) {
+            this.cookies = new HashMap<>();
+        }
+
+        this.cookies.putAll(cookies);
+        return true;
+    }
+
     public boolean updateCookie(String key, String value) {
         if (this.cookies == null) {
             this.cookies = new HashMap<>();
@@ -132,42 +153,30 @@ public class CreateOrderService {
     }
 
     //发送请求到帮家
-    public DataBus postToBangJia(HeJiaOrder heJiaOrder) {
-        int flag = 0;//0 失败 1 成功 2 请求成功但是更新数据库失败！
+    public DataBus postToBangJia(BangJiaOrder bangJiaOrder, Boolean isRetry) throws HttpException {
+        BangJiaOrderStateEnum stateEnum = null;
+        int flag = DataBus.FAILURE_CODE;//0 失败 1 成功 2 请求成功但是更新数据库失败！
         String message = null;
-        DataBus<List<CreaterOrder>> dataBus = truncateOrder(heJiaOrder);
-        if (dataBus.getCode() != DataBus.SUCCESS_CODE) {
-            return dataBus;
+        MyHttpRequestBuilder myHttpRequestBuilder = MyHttpRequestBuilder.createReqInstance(Validater.BANGJIA_HTML_VALIDATER);
+        HashMap<String, String> urlEncodedMap = QueryDataMapUtil.getQueryDataMap(bangJiaOrder, BangJiaOrder.class);
+        myHttpRequestBuilder.addParameters(urlEncodedMap);
+        myHttpRequestBuilder.addCookies(this.cookies);
+        myHttpRequestBuilder.addHeaders(this.headers);
+        myHttpRequestBuilder.buildPostForm(httpConfig.getUrl());
+        DataBus<String> reqResult = myHttpRequestBuilder.execute();
+        if (reqResult.getCode() == DataBus.SUCCESS_CODE) {
+            message = "成功";
+            stateEnum = BangJiaOrderStateEnum.SUCCESS;
+            flag = DataBus.SUCCESS_CODE;
+        } else {
+            logger.error("============= 创建订单失败！订单所属合家订单的编码 {}============", bangJiaOrder.getHejiaOrderCode());
+            stateEnum = isRetry ? BangJiaOrderStateEnum.RTFAIL : BangJiaOrderStateEnum.FAIL;
+            message = "失败！\n" + reqResult.getMsg();
+            flag = DataBus.FAILURE_CODE;
         }
-        List<CreaterOrder> createrOrders = dataBus.getData();
-        int successItem = 0;
-        int itemSum = createrOrders.size();
-        logger.info("==>本次需要创建帮家订单数量：{}", itemSum);
+        bangJiaOrder.setState(stateEnum);
 
-        for (CreaterOrder createrOrder : createrOrders) {
-            MyHttpRequestBuilder myHttpRequestBuilder = MyHttpRequestBuilder.createFormReqInstance(Validater.BANGJIA_HTML_VALIDATER);
-            HashMap<String, String> urlEncodedMap = QueryDataMapUtil.getQueryDataMap(createrOrder, CreaterOrder.class);
-            myHttpRequestBuilder.addParameters(urlEncodedMap);
-            myHttpRequestBuilder.addCookies(this.cookies);
-            myHttpRequestBuilder.addHeaders(this.headers);
-            myHttpRequestBuilder.build(httpConfig.getUrl());
-            DataBus<String> reqResult = myHttpRequestBuilder.execute();
-            if (reqResult.getCode() == DataBus.SUCCESS_CODE) {
-                successItem++;
-            } else {
-                logger.error("============= 创建订单失败！订单所属合家订单的编码 {}============", createrOrder.getHeJiaOrderCode());
-                //todo 将错误的订单入库
-
-            }
-        }
-
-        heJiaOrder.setActive(false);
-        heJiaOrder.setSuccessNum(successItem);
-
-        int res = mapper.updateStateById(heJiaOrder);
-
-        logger.info("==>成功创建帮家订单数量：{}", successItem);
-
+        int res = bangJiaOrderMapper.updateStateById(bangJiaOrder);
         //响应结果
         return new DataBus(flag, message, null);
     }
@@ -178,103 +187,53 @@ public class CreateOrderService {
      * @return
      */
     public DataBus retryCreateOrder() {
-        //todo 查询失败的下级订单
+        try {
+            //万一错误是由于没有登录呢
+            boolean logon = loginService.LoginCheck(UpOrDownStream.DOWN_STREAM);
+            if (!logon) {
+                DataBus<Map<String, String>> res = loginService.login(UpOrDownStream.DOWN_STREAM);
+                if (res.getCode() == DataBus.SUCCESS_CODE) {
+                    this.updateCookies(res.getData());
+                } else {
+                    return res;
+                }
+            }
+            //查询失败的订单
+            long successNum = 0L;
+            long totalOrder = 0l;
+            long id = 0L;
+            DBQueryPage page = new DBQueryPage();
+            page.setPageSize(30);
 
-        //todo 用查询的结果再次创建订单
+            while (true) {//轮循获取数据
+                page.setId(id);
+                List<BangJiaOrder> bangjiaOrders = bangJiaOrderMapper.processGetOrders(page, BangJiaOrderStateEnum.FAIL);
+                if (bangjiaOrders == null || bangjiaOrders.size() == 0) {
+                    if (totalOrder == 0l) {
+                        logger.info("没有帮家失败一次的订单用于创建！");
+                    }
+                    break;
+                } else {
+                    id = bangjiaOrders.get(bangjiaOrders.size() - 1).getId();
+                    for (BangJiaOrder bangJiaOrder : bangjiaOrders) {
+                        totalOrder++;
+                        DataBus result = postToBangJia(bangJiaOrder, true);
+                        if (result.getCode() != DataBus.SUCCESS_CODE) {
+                            //todo retry的日志输出到另一个文件
+                            logger.error(result.getMsg());
+                        } else {
+                            successNum++;
+                        }
+                    }
+                }
+            }
 
-        //todo 仅仅重试一次，失败则单独记录重试失败的日志
-
-        return DataBus.failure();
-    }
-
-    private DataBus<List<CreaterOrder>> truncateOrder(HeJiaOrder heJiaOrder) {
-        List<CreaterOrder> orders = new ArrayList<>();
-
-        //原数据
-        Date buyDate = new Date(heJiaOrder.getCreatedDate());
-        String address = heJiaOrder.getReceiverAddress();
-        String userName = heJiaOrder.getReceiverName();
-        String mobile = heJiaOrder.getReceiverPhone();
-        String orderInfoName = heJiaOrder.getOrderInfoName();
-        Double payAmount = heJiaOrder.getPayAmount();
-        List<ItemList> itemLists = heJiaOrder.getCommodityItemList();
-        String code = heJiaOrder.getOrderCode();
-
-
-        //目标数据
-        Date repaireDate = getRepairedDate(buyDate);//repaireDateCalender.getTime();
-        //todo bug
-        String orderType = orderTypeService.getServiceCode(orderInfoName);//;// //服务项目
-        Address addressConfig = CityUtil.getAddress(address);
-        if (addressConfig == null) {
-            logger.error("===>找不到address【{}】的配置省市地址！", address);
-            return DataBus.failure(MessageCode.Code.ADDRESS_NOT_MATCHED, MessageCode.Message.ADDRESS_NOT_MATCHED);
-        }
-        String province = addressConfig.getProvince().getCode();
-        String city = addressConfig.getCity().getCode();
-        String county = addressConfig.getCounty().getCode();
-        String town = addressConfig.getTown().getCode();
-        String note = "订单名称：" + orderInfoName + "\n 所属合家订单编码:" + code;
-
-        for (ItemList itemList : itemLists) {
-            Double amount = itemList.getAmount();
-            String commodityInfoName = itemList.getCommodityInfoName();
-            Integer commodityInfoNum = itemList.getCommodityInfoNum();
-            Double commodityInfoPrice = itemList.getCommodityInfoPrice();
-            String skucode = itemList.getSkucode();
-            String summary = itemList.getSummary();
-
-            CreaterOrder createrOrder = new CreaterOrder();
-            createrOrder.setHeJiaOrderCode(code);
-            createrOrder.setNumber_0(commodityInfoNum);
-            createrOrder.setOrdertype(orderType);
-            createrOrder.setServicemode("上门");
-            createrOrder.setGuarantee(1);
-            createrOrder.setOriginname(addressConfig.getVillage());//工单来源 指的是哪个小区来的工单--2020年5月17日
-            createrOrder.setFactorynumber(orderInfoName);
-            createrOrder.setPrice(0d);
-            createrOrder.setRepairdate(repairDateFormat.format(repaireDate));
-            createrOrder.setUsername(userName);
-            createrOrder.setMobile(mobile);
-            createrOrder.setProvince(province);
-            createrOrder.setCity(city);
-            createrOrder.setCounty(county);
-            createrOrder.setTown(town);
-            createrOrder.setAddress(address);
-            createrOrder.setMbuyprice(amount);
-            createrOrder.setCreatename("靳丰");
-            createrOrder.setMbuydate(buyDateFormat.format(buyDate));
-            createrOrder.setNote(note);
-
-            orders.add(createrOrder);
+            return DataBus.failure();
+        } catch (HttpException e) {
+            e.printStackTrace();
+            return DataBus.failure(e.getCode(), e.getMsg());
         }
 
-
-        return DataBus.success(orders);
     }
-
-    /**
-     * 获取上门时间
-     * 1. 等于下单时间的时间+2天
-     * 2. 下单时间过了18点，就要+3
-     * 3. 上门时间的小时可以随便写，我这里就默认是0了
-     *
-     * @param buyDate
-     * @return
-     */
-    private Date getRepairedDate(Date buyDate) {
-        Calendar repaireDateCalender = Calendar.getInstance();
-        repaireDateCalender.setTime(buyDate);
-        //检查是否>=18点
-        int hour = repaireDateCalender.get(Calendar.HOUR_OF_DAY);
-        boolean isOffWork = false;
-        if (hour >= 18) {
-            isOffWork = true;
-        }
-        int offset = isOffWork ? 3 : 2;
-        repaireDateCalender.add(Calendar.DAY_OF_MONTH, offset);
-        return repaireDateCalender.getTime();
-    }
-
 
 }

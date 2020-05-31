@@ -20,7 +20,7 @@ public class HeJiaOrder {
     private Double payAmount;//实收金额;
     private ArrayList<ItemList> commodityItemList;
     private String jsonStr;
-    private Integer successNum = 0;
+//    private Integer successNum = 0;
     private Integer sumNum = 0;
     private Boolean active = true;
     private Date createdAt;
@@ -165,13 +165,13 @@ public class HeJiaOrder {
         this.jsonStr = jsonStr;
     }
 
-    public Integer getSuccessNum() {
-        return successNum;
-    }
+//    public Integer getSuccessNum() {
+//        return successNum;
+//    }
 
-    public void setSuccessNum(Integer successNum) {
-        this.successNum = successNum;
-    }
+//    public void setSuccessNum(Integer successNum) {
+//        this.successNum = successNum;
+//    }
 
     public Integer getSumNum() {
         return sumNum;

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ang.reptile.mapper.BangJiaOrderMapper">
+    <sql id="insertColumns">
+        hejia_order_code,
+        ordertype,
+        number_0,
+        servicemode,
+        guarantee,
+        guarantee_name,
+        originname,
+        factorynumber,
+        repairdate,
+        price,
+        username,
+        mobile,
+        province,
+        city,
+        county,
+        town,
+        address,
+        mbuyprice,
+        mbuydate,
+        createname,
+        note,
+        state,
+        created_at
+    </sql>
+
+    <sql id="selectColumns">
+        id,
+        hejia_order_code,
+        ordertype,
+        number_0,
+        servicemode,
+        guarantee,
+        guarantee_name,
+        originname,
+        factorynumber,
+        repairdate,
+        price,
+        username,
+        mobile,
+        province,
+        city,
+        county,
+        town,
+        address,
+        mbuyprice,
+        mbuydate,
+        createname,
+        note,
+        state,
+        created_at,
+        updated_at
+    </sql>
+
+    <resultMap id="bangJiaOrderMap" type="com.ang.reptile.pojo.BangJiaOrder">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="hejia_order_code" property="hejiaOrderCode" jdbcType="VARCHAR"/>
+        <result column="ordertype" property="ordertype" jdbcType="VARCHAR"/>
+        <result column="number_0" property="number_0" jdbcType="INTEGER"/>
+        <result column="servicemode" property="servicemode" jdbcType="VARCHAR"/>
+        <result column="guarantee" property="guarantee" jdbcType="INTEGER"/>
+        <result column="guarantee_name" property="guaranteeName" jdbcType="VARCHAR"/>
+        <result column="originname" property="originname" jdbcType="VARCHAR"/>
+        <result column="factorynumber" property="factorynumber" jdbcType="VARCHAR"/>
+        <result column="repairdate" property="repairdate" jdbcType="VARCHAR" />
+        <result column="price" property="price" jdbcType="DOUBLE"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+        <result column="mobile" property="mobile" jdbcType="VARCHAR"/>
+        <result column="province" property="province" jdbcType="VARCHAR"/>
+        <result column="city" property="city" jdbcType="VARCHAR"/>
+        <result column="county" property="county" jdbcType="VARCHAR"/>
+        <result column="town" property="town" jdbcType="VARCHAR"/>
+        <result column="address" property="address" jdbcType="VARCHAR"/>
+        <result column="mbuyprice" property="mbuyprice" jdbcType="DOUBLE"/>
+        <result column="mbuydate" property="mbuydate" jdbcType="VARCHAR"/>
+        <result column="createname" property="createname" jdbcType="VARCHAR"/>
+        <result column="note" property="note" jdbcType="VARCHAR"/>
+        <result column="state" property="state" jdbcType="INTEGER" typeHandler="com.ang.reptile.mapper.typehandler.BangJiaOrderStateEnumHandler"/>
+        <result column="created_at" property="createdAt" jdbcType="DATE"/>
+        <result column="updated_at" property="updatedAt" jdbcType="DATE"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.ang.reptile.pojo.BangJiaOrder">
+        insert into bangjia_order(<include refid="insertColumns"></include>)
+        values(
+            #{hejiaOrderCode},
+            #{ordertype},
+            #{number_0},
+            #{servicemode},
+            #{guarantee},
+            #{guaranteeName},
+            #{originname},
+            #{factorynumber},
+            #{repairdate},
+            #{price},
+            #{username},
+            #{mobile},
+            #{province},
+            #{city},
+            #{county},
+            #{town},
+            #{address},
+            #{mbuyprice},
+            #{mbuydate},
+            #{createname},
+            #{note},
+            #{state, typeHandler=com.ang.reptile.mapper.typehandler.BangJiaOrderStateEnumHandler},
+            now()
+        )
+    </insert>
+
+    <insert id="inserts" parameterType="java.util.List">
+        insert into bangjia_order(<include refid="insertColumns"></include>)
+        values
+        <foreach collection="bangJiaOrders" item="order" separator=",">
+            (
+            #{order.hejiaOrderCode},
+            #{order.ordertype},
+            #{order.number_0},
+            #{order.servicemode},
+            #{order.guarantee},
+            #{order.guaranteeName},
+            #{order.originname},
+            #{order.factorynumber},
+            #{order.repairdate},
+            #{order.price},
+            #{order.username},
+            #{order.mobile},
+            #{order.province},
+            #{order.city},
+            #{order.county},
+            #{order.town},
+            #{order.address},
+            #{order.mbuyprice},
+            #{order.mbuydate},
+            #{order.createname},
+            #{order.note},
+            #{order.state, typeHandler=com.ang.reptile.mapper.typehandler.BangJiaOrderStateEnumHandler},
+            now()
+            )
+        </foreach>
+    </insert>
+
+
+    <select id="processGetOrders" parameterType="com.ang.reptile.model.Page" resultMap="bangJiaOrderMap">
+        select
+        <include refid="selectColumns"/>
+        from bangjia_order
+        where id > #{page.id}
+        and state = #{state, typeHandler=com.ang.reptile.mapper.typehandler.BangJiaOrderStateEnumHandler}
+        order by id asc
+        limit #{page.pageSize}
+    </select>
+
+    <update id="updateStateById" parameterType="com.ang.reptile.pojo.BangJiaOrder">
+        update bangjia_order
+        set state = #{state, typeHandler=com.ang.reptile.mapper.typehandler.BangJiaOrderStateEnumHandler}
+        where id = #{id}
+    </update>
+
+    <update id="updateStateByIds" parameterType="java.util.List">
+        update bangjia_order
+        set state = #{state, typeHandler=com.ang.reptile.mapper.typehandler.BangJiaOrderStateEnumHandler}
+        where id in (
+        <foreach collection="ids" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </update>
+</mapper>

@@ -1,5 +1,8 @@
 package com.ang.reptile.util.http;
 
+import com.ang.reptile.Enum.Validater;
+import com.ang.reptile.code.MessageCode;
+import com.ang.reptile.exception.HttpException;
 import com.ang.reptile.model.DataBus;
 import okhttp3.*;
 
@@ -22,7 +25,7 @@ public class MyHttpRequestBuilder {
 
     private MyHttpRequestBuilder(){}
 
-    public static MyHttpRequestBuilder createFormReqInstance(Validater validater) {
+    public static MyHttpRequestBuilder createReqInstance(Validater validater) {
         MyHttpRequestBuilder myHttpRequestBuilder = new MyHttpRequestBuilder();
         OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder().cookieJar(new CookieJar() {
             @Override
@@ -44,7 +47,7 @@ public class MyHttpRequestBuilder {
 
     }
 
-    public MyHttpRequestBuilder build(String url) {
+    public MyHttpRequestBuilder buildPostForm(String url) {
         //parameters formBody
         FormBody formBody = buildFormBody();
         //cookies headers
@@ -59,13 +62,45 @@ public class MyHttpRequestBuilder {
         return this;
     }
 
+    public MyHttpRequestBuilder buildGet(String uri) {
+        //parameters to get uri
+        String url = uri;
+        if (urlEncodedMap != null) {
+            uri += "?";
+            for (Map.Entry<String, String> entry : urlEncodedMap.entrySet()) {
+                uri += entry.getKey() + "=" + entry.getValue() + "&&";
+            }
+        }
+
+        int indx = url.lastIndexOf("&&");
+        if (indx > 0) {
+            url.substring(0, indx);
+        }
+
+        //cookies headers
+        Headers headers = buildHeadersAndCookies();
+        //headers
+        this.request = new Request.Builder()
+                .url(url)
+                .get()
+                .headers(headers)
+                .build();
+
+        return this;
+    }
+
     private Headers buildHeadersAndCookies() {
         Headers.Builder headersBuilder = new Headers.Builder();
-        String cookieValue = cookies.entrySet().stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue()).collect(Collectors.joining(";"));
+        String cookieValue = "";
+        if (cookies != null) {
+            cookieValue = cookies.entrySet().stream()
+                    .map(entry -> entry.getKey() + "=" + entry.getValue()).collect(Collectors.joining(";"));
+        }
         headersBuilder.add("Cookie", cookieValue);
-        for (Map.Entry<String, String> header : this.headers.entrySet()) {
-            headersBuilder.add(header.getKey(), header.getValue());
+        if (this.headers != null) {
+            for (Map.Entry<String, String> header : this.headers.entrySet()) {
+                headersBuilder.add(header.getKey(), header.getValue());
+            }
         }
         Headers headers = headersBuilder.build();
         return headers;
@@ -93,7 +128,7 @@ public class MyHttpRequestBuilder {
         this.okHttpClient = okHttpClient;
     }
 
-    public void addParameters(HashMap<String, String> urlEncodedMap) {
+    public void addParameters(Map<String, String> urlEncodedMap) {
         if (this.urlEncodedMap == null) {
             this.urlEncodedMap = new HashMap<>();
         }
@@ -101,27 +136,27 @@ public class MyHttpRequestBuilder {
 
     }
 
-    public void addCookies(HashMap<String, String> cookies) {
+    public void addCookies(Map<String, String> cookies) {
         this.cookies.putAll(cookies);
     }
 
-    public void addHeaders(HashMap<String, String> headers) {
+    public void addHeaders(Map<String, String> headers) {
         this.headers.putAll(headers);
     }
 
-    public DataBus<String> execute() {
+    public DataBus<String> execute() throws HttpException {
         String resultStr;
         try (Response response = this.okHttpClient.newCall(this.request).execute()) {
             resultStr = response.body().string();
         } catch (Exception e) {
             e.printStackTrace();
-            return DataBus.failure(e.getMessage());
+            throw new HttpException(MessageCode.Code.REQUEST_ERROR, e.getMessage());
         }
 
         //检验是否是成功的
-        boolean isSuccess = validater.validate(resultStr);
+        boolean isSuccess = validater == null ? true : validater.validate(resultStr);
 
-        return isSuccess ? DataBus.success() : DataBus.failure(resultStr);
+        return isSuccess ? DataBus.success(resultStr) : DataBus.failure(resultStr);
 
     }
 }

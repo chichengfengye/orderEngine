@@ -16,3 +16,19 @@ logging:
     path: D:/projs/logs/order
 
 config-path: D:/projs/order/configs
+
+retry: true
+
+login-checker:
+  down-stream:
+    login:
+      params:
+        username: LJJ0001
+        passworld: 123456
+      login-url: http://wangdian.bangjia.me/index.php/Public/login.html
+    key-worlds:
+      url: http://wangdian.bangjia.me/index.php/Ucenter/index.html
+      keys:
+        - 北京丽家洁环保科技有限责任公司
+        - LJJ0001
+

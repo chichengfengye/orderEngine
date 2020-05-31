@@ -1,9 +1,13 @@
 package com.ang.reptile.controller;
 
+import com.ang.reptile.Enum.UpOrDownStream;
+import com.ang.reptile.exception.HttpException;
 import com.ang.reptile.model.DataBus;
 import com.ang.reptile.model.Message;
 import com.ang.reptile.service.GetOrderService;
 import com.ang.reptile.service.CreateOrderService;
+import com.ang.reptile.service.LoginService;
+import com.ang.reptile.service.TruncateOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +22,10 @@ public class Controller {
     private GetOrderService getOrderService;
     @Autowired
     private CreateOrderService createOrderService;
+    @Autowired
+    private TruncateOrderService truncateOrderService;
+    @Autowired
+    private LoginService loginService;
 
 
     @RequestMapping("/getData")
@@ -42,11 +50,24 @@ public class Controller {
 
     @RequestMapping("/createOrder")
     public Object createOrder() {
-        return createOrderService.createOrder();
+        try {
+            truncateOrderService.truncateOrder();
+
+            return createOrderService.createOrder();
+        } catch (HttpException e) {
+            e.printStackTrace();
+        }
+        return DataBus.failure();
     }
 
     @RequestMapping("/updateCookie")
     public Object setCookie(String key, String cookie) {
         return createOrderService.updateCookie(key, cookie);
     }
+
+    @RequestMapping("/loginBangjia")
+    public Object setCookie() throws HttpException {
+        return loginService.login(UpOrDownStream.DOWN_STREAM);
+    }
+
 }

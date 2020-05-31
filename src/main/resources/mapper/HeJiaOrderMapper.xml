@@ -13,7 +13,6 @@
             pay_amount,
             commodity_item_list,
             jsonStr,
-            success_num,
             sum_num,
             active,
             created_at
@@ -31,7 +30,6 @@
             pay_amount,
             commodity_item_list,
             jsonStr,
-            success_num,
             sum_num,
             active,
             created_at,
@@ -51,7 +49,6 @@
         <result column="commodity_item_list" property="commodityItemList" jdbcType="LONGVARCHAR"
                 typeHandler="com.ang.reptile.mapper.typehandler.ItemListHandler"/>
         <result column="jsonStr" property="jsonStr" jdbcType="LONGVARCHAR"/>
-        <result column="successNum" property="jsonStr" jdbcType="INTEGER"/>
         <result column="sumNum" property="jsonStr" jdbcType="INTEGER"/>
         <result column="active" property="active" jdbcType="TINYINT"/>
         <result column="created_at" property="createdAt" jdbcType="DATE"/>
@@ -71,10 +68,9 @@
         #{payAmount},
         #{commodityItemList, typeHandler=com.ang.reptile.mapper.typehandler.ItemListHandler},
         #{jsonStr},
-        #{successNum},
         #{sumNum},
         #{active},
-        #{createdAt}
+        now()
         )
     </insert>
 
@@ -90,7 +86,7 @@
 
     <update id="updateStateById" parameterType="com.ang.reptile.pojo.HeJiaOrder">
         update hejia_order
-        set active = #{active}, success_num = #{successNum}
+        set active = #{active}, update_at = now()
         where id = #{id}
     </update>
     <!--<select id="GetUserByID" parameterType="int" resultType="com.test.springtest.dao.MUser">

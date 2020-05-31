@@ -1,8 +1,9 @@
 {
   "url": "http://wangdian.bangjia.me/index.php/Order/addorder.html",
   "cookies": {
-    "PHPSESSID": "m2jrbct5qkb6co4gjph0ulvao1"
+    "PHPSESSID": "8rf356ch9albb6mv74i222pc7fva2"
   },
   "headers": {
+    "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36"
   }
 }

@@ -34,10 +34,7 @@ public class GetOrderService {
     private static HashMap<String, String> cookieMap = new HashMap<>();
 
     /**
-     * 1. 创建excel并且追加标题头
-     * 2. 获取数据，循环插入数据到数据库和excel
-     * 3. 关闭excel
-     *
+     * 获取和家订单
      * @return
      */
     public DataBus<List<String>> loopDoorTrackingData() {
@@ -92,7 +89,7 @@ public class GetOrderService {
         }
 
 
-        logger.info("+++++++++++共获取苏宁 " + allDataSize + "条数据+++++++++++++");
+        logger.info("+++++++++++共获取 " + allDataSize + "条数据+++++++++++++");
         logger.info("+++++++++++共插入数据库 " + allDBItemSize + "条记录+++++++++++++");
 
         DataBus<List<String>> dataBus = DataBus.success();

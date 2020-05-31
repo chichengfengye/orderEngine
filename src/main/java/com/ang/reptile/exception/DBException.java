@@ -1,13 +1,7 @@
 package com.ang.reptile.exception;
 
-public class DBException extends Exception{
-    private String msg;
-    private int code;
-
+public class DBException extends MyException{
     public DBException(int code, String msg) {
-        super();
-        this.code = code;
-        this.msg = msg;
+        super(code, msg);
     }
-
 }
