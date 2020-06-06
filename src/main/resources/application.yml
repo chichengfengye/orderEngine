@@ -24,7 +24,7 @@ login-checker:
     login:
       params:
         username: LJJ0001
-        passworld: 123456
+        password: 123456
       login-url: http://wangdian.bangjia.me/index.php/Public/login.html
     key-worlds:
       url: http://wangdian.bangjia.me/index.php/Ucenter/index.html

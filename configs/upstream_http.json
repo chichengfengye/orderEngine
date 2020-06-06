@@ -1,12 +1,12 @@
 {
   "url": "https://partner.chinavisionary.com/merchant-management/v1/store/shop/order/list",
   "headers": {
-    "token": "CC50EBF1179C45038A0FE86BAE5F9C30",
-    "User-Agent": "PostmanRuntime/7.24.1",
+    "token": "19ECD4850BDA4ED583C3F35ADDD347F8",
+    "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36",
     "Content-Type": "application/json"
   },
   "cookies": {
-
+    "SERVERID": "2ee3a77fab6c751ff5128444e79881b9|1591422015|1591421609"
   },
   "other": {
 

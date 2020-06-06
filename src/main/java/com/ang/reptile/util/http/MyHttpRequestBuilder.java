@@ -25,7 +25,7 @@ public class MyHttpRequestBuilder {
 
     private MyHttpRequestBuilder(){}
 
-    public static MyHttpRequestBuilder createReqInstance(Validater validater) {
+    public static MyHttpRequestBuilder createReqInstance() {
         MyHttpRequestBuilder myHttpRequestBuilder = new MyHttpRequestBuilder();
         OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder().cookieJar(new CookieJar() {
             @Override
@@ -39,10 +39,10 @@ public class MyHttpRequestBuilder {
                 return cookies != null ? cookies : new ArrayList<Cookie>();
 
             }
-        });
+        }).followRedirects(false);
         OkHttpClient okHttpClient = clientBuilder.build();
         myHttpRequestBuilder.okHttpClient = okHttpClient;
-        myHttpRequestBuilder.validater = validater;
+//        myHttpRequestBuilder.validater = validater;
         return myHttpRequestBuilder;
 
     }
@@ -50,6 +50,21 @@ public class MyHttpRequestBuilder {
     public MyHttpRequestBuilder buildPostForm(String url) {
         //parameters formBody
         FormBody formBody = buildFormBody();
+        //cookies headers
+        Headers headers = buildHeadersAndCookies();
+        //headers
+        this.request = new Request.Builder()
+                .url(url)
+                .post(formBody)
+                .headers(headers)
+                .build();
+
+        return this;
+    }
+
+    public MyHttpRequestBuilder buildPostMultiPartForm(String url) {
+        //parameters formBody
+        RequestBody formBody = buildMultiPartFormBody();
         //cookies headers
         Headers headers = buildHeadersAndCookies();
         //headers
@@ -120,6 +135,20 @@ public class MyHttpRequestBuilder {
         return body;
     }
 
+    private RequestBody buildMultiPartFormBody() {
+        MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+
+        if (urlEncodedMap != null && urlEncodedMap.size() >= 0) {
+            for (Map.Entry<String, String> stringObjectEntry : urlEncodedMap.entrySet()) {
+                String name = stringObjectEntry.getKey();
+                String value = stringObjectEntry.getValue();
+                builder.addFormDataPart(name, value);
+            }
+        }
+        RequestBody body = builder.build();
+        return body;
+    }
+
     public OkHttpClient getOkHttpClient() {
         return okHttpClient;
     }
@@ -144,19 +173,27 @@ public class MyHttpRequestBuilder {
         this.headers.putAll(headers);
     }
 
-    public DataBus<String> execute() throws HttpException {
-        String resultStr;
-        try (Response response = this.okHttpClient.newCall(this.request).execute()) {
-            resultStr = response.body().string();
+    public Response execute() throws HttpException {
+        Response response = null;
+        try {
+            response = this.okHttpClient.newCall(this.request).execute();
         } catch (Exception e) {
             e.printStackTrace();
             throw new HttpException(MessageCode.Code.REQUEST_ERROR, e.getMessage());
         }
 
         //检验是否是成功的
-        boolean isSuccess = validater == null ? true : validater.validate(resultStr);
+//        boolean isSuccess = validater == null ? true : validater.validate(response);
 
-        return isSuccess ? DataBus.success(resultStr) : DataBus.failure(resultStr);
+        return response;
 
+    }
+
+    public HashMap<HttpUrl, List<Cookie>> getCookieStore() {
+        return cookieStore;
+    }
+
+    public void setCookieStore(HashMap<HttpUrl, List<Cookie>> cookieStore) {
+        this.cookieStore = cookieStore;
     }
 }

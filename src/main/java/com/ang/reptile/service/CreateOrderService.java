@@ -7,23 +7,20 @@ import com.ang.reptile.config.HttpConfig;
 import com.ang.reptile.dto.DBQueryPage;
 import com.ang.reptile.exception.HttpException;
 import com.ang.reptile.mapper.BangJiaOrderMapper;
-import com.ang.reptile.mapper.HeJiaOrderMapper;
-import com.ang.reptile.model.Address;
 import com.ang.reptile.model.DataBus;
 import com.ang.reptile.pojo.BangJiaOrder;
-import com.ang.reptile.pojo.HeJiaOrder;
-import com.ang.reptile.pojo.ItemList;
 import com.ang.reptile.util.CityUtil;
 import com.ang.reptile.config.ConfigReader;
 import com.ang.reptile.util.QueryDataMapUtil;
 import com.ang.reptile.util.http.MyHttpRequestBuilder;
-import com.ang.reptile.Enum.Validater;
+import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -157,21 +154,27 @@ public class CreateOrderService {
         BangJiaOrderStateEnum stateEnum = null;
         int flag = DataBus.FAILURE_CODE;//0 失败 1 成功 2 请求成功但是更新数据库失败！
         String message = null;
-        MyHttpRequestBuilder myHttpRequestBuilder = MyHttpRequestBuilder.createReqInstance(Validater.BANGJIA_HTML_VALIDATER);
+        MyHttpRequestBuilder myHttpRequestBuilder = MyHttpRequestBuilder.createReqInstance();
         HashMap<String, String> urlEncodedMap = QueryDataMapUtil.getQueryDataMap(bangJiaOrder, BangJiaOrder.class);
         myHttpRequestBuilder.addParameters(urlEncodedMap);
         myHttpRequestBuilder.addCookies(this.cookies);
         myHttpRequestBuilder.addHeaders(this.headers);
         myHttpRequestBuilder.buildPostForm(httpConfig.getUrl());
-        DataBus<String> reqResult = myHttpRequestBuilder.execute();
-        if (reqResult.getCode() == DataBus.SUCCESS_CODE) {
+        Response response = myHttpRequestBuilder.execute();
+        String resultStr = null;
+        try {
+            resultStr = response.body().string();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (resultStr!=null && resultStr.contains("新增成功")) {
             message = "成功";
             stateEnum = BangJiaOrderStateEnum.SUCCESS;
             flag = DataBus.SUCCESS_CODE;
         } else {
             logger.error("============= 创建订单失败！订单所属合家订单的编码 {}============", bangJiaOrder.getHejiaOrderCode());
             stateEnum = isRetry ? BangJiaOrderStateEnum.RTFAIL : BangJiaOrderStateEnum.FAIL;
-            message = "失败！\n" + reqResult.getMsg();
+            message = "失败！\n" + resultStr;
             flag = DataBus.FAILURE_CODE;
         }
         bangJiaOrder.setState(stateEnum);
@@ -189,14 +192,11 @@ public class CreateOrderService {
     public DataBus retryCreateOrder() {
         try {
             //万一错误是由于没有登录呢
-            boolean logon = loginService.LoginCheck(UpOrDownStream.DOWN_STREAM);
-            if (!logon) {
-                DataBus<Map<String, String>> res = loginService.login(UpOrDownStream.DOWN_STREAM);
-                if (res.getCode() == DataBus.SUCCESS_CODE) {
-                    this.updateCookies(res.getData());
-                } else {
-                    return res;
-                }
+            DataBus<Map<String, String>> res = loginService.login(UpOrDownStream.DOWN_STREAM);
+            if (res.getCode() == DataBus.SUCCESS_CODE) {
+                this.updateCookies(res.getData());
+            } else {
+                return res;
             }
             //查询失败的订单
             long successNum = 0L;
@@ -226,6 +226,10 @@ public class CreateOrderService {
                         }
                     }
                 }
+            }
+
+            if (successNum == totalOrder) {
+                return DataBus.success("");
             }
 
             return DataBus.failure();
