@@ -1,9 +1,5 @@
 package com.ang;
 
-import com.ang.reptile.pojo.BangJiaOrder;
-import com.ang.reptile.util.QueryDataMapUtil;
-import com.ang.reptile.util.http.MyHttpRequestBuilder;
-import com.ang.reptile.zhujie.NotEncoded;
 import okhttp3.*;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;

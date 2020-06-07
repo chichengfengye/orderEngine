@@ -1,7 +1,7 @@
 package com.ang.reptile.pojo;
 
 import com.ang.reptile.Enum.BangJiaOrderStateEnum;
-import com.ang.reptile.zhujie.NotEncoded;
+import com.ang.reptile.annotation.NotEncoded;
 
 import java.util.Date;
 

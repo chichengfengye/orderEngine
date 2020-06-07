@@ -1,6 +1,6 @@
 package com.ang.reptile.util;
 
-import com.ang.reptile.zhujie.NotEncoded;
+import com.ang.reptile.annotation.NotEncoded;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
