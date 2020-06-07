@@ -24,10 +24,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service("heJiaOrderService")
-public class HeJiaOrderService implements GetOrderService {
+public class GetOrderServiceHeJia implements GetOrderService {
     @Autowired
     private HeJiaOrderMapper mapper;
-    private Logger logger = LoggerFactory.getLogger(HeJiaOrderService.class);
+    private Logger logger = LoggerFactory.getLogger(GetOrderServiceHeJia.class);
     private String reqUrl = "";
     private static final int pageSize = 15;
     private HashMap<String, String> headers = new HashMap<>();

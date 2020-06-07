@@ -1,6 +1,6 @@
 package com.ang.reptile;
 
-import com.ang.reptile.service.impl.HeJiaOrderService;
+import com.ang.reptile.service.impl.GetOrderServiceHeJia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ public class ReptileApplicationRunner implements ApplicationRunner {
     private Logger logger = LoggerFactory.getLogger(ReptileApplicationRunner.class);
 
     @Autowired
-    private HeJiaOrderService heJiaOrderService;
+    private GetOrderServiceHeJia getOrderServiceHeJia;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {

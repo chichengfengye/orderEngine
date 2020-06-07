@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service("lvDiOrderService")
-public class LvDiOrderService implements GetOrderService {
+public class GetOrderServiceLvDi implements GetOrderService {
     @Override
     public DataBus<List<String>> loopDoorTrackingData() {
         return null;
