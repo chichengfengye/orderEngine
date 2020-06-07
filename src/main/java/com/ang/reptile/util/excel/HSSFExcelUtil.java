@@ -38,7 +38,6 @@ public class HSSFExcelUtil {
             out.close();
             System.out.println(row.getPhysicalNumberOfCells()+" "+row.getLastCellNum());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } //获取d://test.xls
 
