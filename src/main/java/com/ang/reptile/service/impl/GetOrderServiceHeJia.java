@@ -40,7 +40,7 @@ public class GetOrderServiceHeJia implements GetOrderService {
      */
     @Override
     public DataBus<List<String>> loopDoorTrackingData() {
-        HttpConfig httpConfig = ConfigReader.getConfig("upstream_http.json");
+        HttpConfig httpConfig = ConfigReader.getHttpConfig("upstream_http.json");
 
         HashMap<String, String> cookies = httpConfig.getCookies();
         if (cookies != null && cookies.size() > 0) {

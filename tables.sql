@@ -1,3 +1,19 @@
+create table bangjia_service_type(
+    id serial primary key ,
+    name varchar(255),
+    code varchar(255),
+    created_at datetime,
+    updated_at datetime
+)
+
+create table hejia_service_type(
+    id serial primary key ,
+    name varchar(255),
+    code varchar(255),
+    created_at datetime,
+    updated_at datetime
+)
+
 create table bangjia_order(
     id serial primary key,
     hejia_order_code varchar(255),
@@ -22,8 +38,8 @@ create table bangjia_order(
     createname varchar(255),
     note varchar(255),
     state integer,
-    created_at date,
-    updated_at date
+    created_at datetime,
+    updated_at datetime
 )
 
 create table hejia_order(
@@ -41,8 +57,8 @@ create table hejia_order(
     success_num int,
     sum_num int,
     active tinyint(1) default false ,
-    created_at date,
-    update_at date
+    created_at datetime,
+    update_at datetime
 )
 
 create table order_type(
@@ -59,18 +75,3 @@ create table upstream_order_state(
     record varchar(1024)
 )
 
-create table bangjia_service_type(
-    id serial primary key ,
-    name varchar(255),
-    code varchar(255),
-    create_time date,
-    update_time date
-)
-
-create table hejia_service_type(
-    id serial primary key ,
-    name varchar(255),
-    code varchar(255),
-    create_time date,
-    update_time date
-)

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ang.reptile.mapper.HeJiaServiceTypeMapper">
+    <sql id="insertColumns">
+        name,
+        code,
+        created_at
+    </sql>
+
+    <sql id="selectColumns">
+        id,
+        name,
+        code,
+        created_at,
+        updated_at
+    </sql>
+
+    <insert id="insert" parameterType="com.ang.reptile.pojo.HeJiaServiceType">
+        insert into bangjia_service_type(<include refid="insertColumns"></include>)
+        values(
+            #{name},
+            #{code},
+            now()
+        )
+    </insert>
+
+    <insert id="inserts" parameterType="java.util.List">
+        insert into bangjia_service_type(<include refid="insertColumns"></include>)
+        values
+        <foreach collection="serviceTypes" item="serviceType" separator=",">
+            (
+                #{name},
+                #{code},
+                now()
+            )
+        </foreach>
+    </insert>
+
+    <select id="getAll">
+        select <include refid="selectColumns"/>
+        from bangjia_service_type
+    </select>
+</mapper>

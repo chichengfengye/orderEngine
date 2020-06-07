@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -49,8 +48,6 @@ public class CreateOrderServiceImpl implements CreateOrderService {
 
     private HashMap<String, String> cookies = new HashMap<>();
     private HashMap<String, String> headers = new HashMap<>();
-    SimpleDateFormat repairDateFormat = new SimpleDateFormat("yy:MM:dd HH:mm:ss");
-    SimpleDateFormat buyDateFormat = new SimpleDateFormat("yy-MM-dd");
 
     public CreateOrderServiceImpl() {
         loadConfigs();
@@ -240,7 +237,7 @@ public class CreateOrderServiceImpl implements CreateOrderService {
     }
 
     private void loadConfigs() {
-        this.httpConfig = ConfigReader.getConfig("downstream_http.json");
+        this.httpConfig = ConfigReader.getHttpConfig("downstream_http.json");
         this.headers = httpConfig.getHeaders();
         this.cookies = httpConfig.getCookies();
 

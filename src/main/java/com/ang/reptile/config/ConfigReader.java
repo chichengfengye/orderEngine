@@ -16,7 +16,7 @@ public class ConfigReader {
         configPath = path;
     }
 
-    public static HttpConfig getConfig(String path) {
+    public static HttpConfig getHttpConfig(String path) {
         path = generatePath(path);
         FileReader fileReader = new FileReader(path);
         String result = fileReader.readString();
