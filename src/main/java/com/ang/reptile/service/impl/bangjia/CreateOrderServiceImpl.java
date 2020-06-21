@@ -1,4 +1,4 @@
-package com.ang.reptile.service.impl;
+package com.ang.reptile.service.impl.bangjia;
 
 import com.ang.reptile.Enum.BangJiaOrderStateEnum;
 import com.ang.reptile.Enum.UpOrDownStream;
@@ -11,6 +11,7 @@ import com.ang.reptile.model.DataBus;
 import com.ang.reptile.pojo.BangJiaOrder;
 import com.ang.reptile.service.CreateOrderService;
 import com.ang.reptile.service.LoginService;
+import com.ang.reptile.service.impl.OrderTypeServiceImpl;
 import com.ang.reptile.util.CityUtil;
 import com.ang.reptile.config.ConfigReader;
 import com.ang.reptile.util.QueryDataMapUtil;

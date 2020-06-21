@@ -1,6 +1,6 @@
 package com.ang.reptile;
 
-import com.ang.reptile.service.impl.GetOrderServiceHeJia;
+import com.ang.reptile.service.impl.hejia.GetOrderServiceHeJia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

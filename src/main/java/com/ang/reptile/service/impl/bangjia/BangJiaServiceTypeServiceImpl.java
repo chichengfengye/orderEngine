@@ -1,4 +1,4 @@
-package com.ang.reptile.service.impl;
+package com.ang.reptile.service.impl.bangjia;
 
 import com.ang.reptile.mapper.BangJiaServiceTypeMapper;
 import com.ang.reptile.model.BangJiaServiceType;

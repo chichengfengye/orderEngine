@@ -1,4 +1,4 @@
-package com.ang.reptile.service.impl;
+package com.ang.reptile.service.impl.hejia;
 
 import com.ang.reptile.mapper.HeJiaServiceTypeMapper;
 import com.ang.reptile.model.HeJiaServiceType;

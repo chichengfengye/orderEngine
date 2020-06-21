@@ -4,8 +4,6 @@ import com.ang.reptile.exception.HttpException;
 import com.ang.reptile.model.DataBus;
 import com.ang.reptile.service.CreateOrderService;
 import com.ang.reptile.service.TruncateOrderService;
-import com.ang.reptile.service.impl.TruncateOrderServiceBangJia;
-import com.ang.reptile.service.impl.CreateOrderServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
