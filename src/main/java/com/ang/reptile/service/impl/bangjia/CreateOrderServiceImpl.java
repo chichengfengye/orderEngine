@@ -8,7 +8,7 @@ import com.ang.reptile.dto.DBQueryPage;
 import com.ang.reptile.exception.HttpException;
 import com.ang.reptile.mapper.BangJiaOrderMapper;
 import com.ang.reptile.model.DataBus;
-import com.ang.reptile.pojo.BangJiaOrder;
+import com.ang.reptile.entity.BangJiaOrder;
 import com.ang.reptile.service.CreateOrderService;
 import com.ang.reptile.service.LoginService;
 import com.ang.reptile.service.impl.OrderTypeServiceImpl;

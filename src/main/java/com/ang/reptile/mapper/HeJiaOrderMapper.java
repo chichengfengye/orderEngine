@@ -1,8 +1,7 @@
 package com.ang.reptile.mapper;
 
 import com.ang.reptile.model.Page;
-import com.ang.reptile.pojo.HeJiaOrder;
-import com.sun.org.apache.xpath.internal.operations.Bool;
+import com.ang.reptile.entity.HeJiaOrder;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

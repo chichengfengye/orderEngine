@@ -1,4 +1,4 @@
-package com.ang.reptile.pojo;
+package com.ang.reptile.entity;
 
 public class ItemList {
     private Double amount;//总价

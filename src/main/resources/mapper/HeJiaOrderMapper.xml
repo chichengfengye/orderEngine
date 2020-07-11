@@ -36,7 +36,7 @@
             update_at
     </sql>
 
-    <resultMap id="heJiaOrderMap" type="com.ang.reptile.pojo.HeJiaOrder">
+    <resultMap id="heJiaOrderMap" type="com.ang.reptile.entity.HeJiaOrder">
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="order_info_name" property="orderInfoName" jdbcType="VARCHAR"/>
         <result column="state" property="state" jdbcType="INTEGER"/>
@@ -55,7 +55,7 @@
         <result column="update_at" property="updateAt" jdbcType="DATE"/>
     </resultMap>
 
-    <insert id="insert" parameterType="com.ang.reptile.pojo.HeJiaOrder">
+    <insert id="insert" parameterType="com.ang.reptile.entity.HeJiaOrder">
         insert into hejia_order(<include refid="insertColumns"></include>)
         values(
         #{orderInfoName},
@@ -84,7 +84,7 @@
         limit #{page.pageSize}
     </select>
 
-    <update id="updateStateById" parameterType="com.ang.reptile.pojo.HeJiaOrder">
+    <update id="updateStateById" parameterType="com.ang.reptile.entity.HeJiaOrder">
         update hejia_order
         set active = #{active}, update_at = now()
         where id = #{id}

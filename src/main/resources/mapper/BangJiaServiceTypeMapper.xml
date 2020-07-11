@@ -16,7 +16,7 @@
         updated_at
     </sql>
 
-    <insert id="insert" parameterType="com.ang.reptile.pojo.BangJiaServiceType">
+    <insert id="insert" parameterType="com.ang.reptile.entity.BangJiaServiceType">
         insert into bangjia_service_type(<include refid="insertColumns"></include>)
         values(
             #{name},

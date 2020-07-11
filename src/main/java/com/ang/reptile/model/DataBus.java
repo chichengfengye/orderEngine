@@ -66,6 +66,10 @@ public class DataBus<T> {
         DataBus message = new DataBus(1, SUCCESS_MSG, null);
         return message;
     }
+    public static DataBus success(int code, String msg) {
+        DataBus message = new DataBus(code, msg, null);
+        return message;
+    }
     public static DataBus success(String msg) {
         DataBus message = new DataBus(1, msg, null);
         return message;

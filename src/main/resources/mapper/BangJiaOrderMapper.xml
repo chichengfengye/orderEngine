@@ -56,7 +56,7 @@
         updated_at
     </sql>
 
-    <resultMap id="bangJiaOrderMap" type="com.ang.reptile.pojo.BangJiaOrder">
+    <resultMap id="bangJiaOrderMap" type="com.ang.reptile.entity.BangJiaOrder">
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="hejia_order_code" property="hejiaOrderCode" jdbcType="VARCHAR"/>
         <result column="ordertype" property="ordertype" jdbcType="VARCHAR"/>
@@ -84,7 +84,7 @@
         <result column="updated_at" property="updatedAt" jdbcType="DATE"/>
     </resultMap>
 
-    <insert id="insert" parameterType="com.ang.reptile.pojo.BangJiaOrder">
+    <insert id="insert" parameterType="com.ang.reptile.entity.BangJiaOrder">
         insert into bangjia_order(<include refid="insertColumns"></include>)
         values(
             #{hejiaOrderCode},
@@ -156,7 +156,7 @@
         limit #{page.pageSize}
     </select>
 
-    <update id="updateStateById" parameterType="com.ang.reptile.pojo.BangJiaOrder">
+    <update id="updateStateById" parameterType="com.ang.reptile.entity.BangJiaOrder">
         update bangjia_order
         set state = #{state, typeHandler=com.ang.reptile.mapper.typehandler.BangJiaOrderStateEnumHandler}
         where id = #{id}

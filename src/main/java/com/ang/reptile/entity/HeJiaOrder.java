@@ -1,4 +1,4 @@
-package com.ang.reptile.pojo;
+package com.ang.reptile.entity;
 
 import java.util.ArrayList;
 import java.util.Date;

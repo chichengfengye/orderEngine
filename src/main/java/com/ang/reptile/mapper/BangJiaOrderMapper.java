@@ -2,7 +2,7 @@ package com.ang.reptile.mapper;
 
 import com.ang.reptile.Enum.BangJiaOrderStateEnum;
 import com.ang.reptile.model.Page;
-import com.ang.reptile.pojo.BangJiaOrder;
+import com.ang.reptile.entity.BangJiaOrder;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

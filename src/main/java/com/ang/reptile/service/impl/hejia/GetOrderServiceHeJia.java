@@ -6,9 +6,9 @@ import com.ang.reptile.config.HttpConfig;
 import com.ang.reptile.mapper.HeJiaOrderMapper;
 import com.ang.reptile.model.DataBus;
 import com.ang.reptile.model.Page;
-import com.ang.reptile.pojo.HeJiaOrder;
-import com.ang.reptile.pojo.ItemList;
-import com.ang.reptile.service.GetOrderService;
+import com.ang.reptile.entity.HeJiaOrder;
+import com.ang.reptile.entity.ItemList;
+import com.ang.reptile.service.OrderService;
 import com.ang.reptile.util.*;
 import okhttp3.*;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service("heJiaOrderService")
-public class GetOrderServiceHeJia implements GetOrderService {
+public class GetOrderServiceHeJia implements OrderService {
     @Autowired
     private HeJiaOrderMapper mapper;
     private Logger logger = LoggerFactory.getLogger(GetOrderServiceHeJia.class);
@@ -39,7 +39,7 @@ public class GetOrderServiceHeJia implements GetOrderService {
      * @return
      */
     @Override
-    public DataBus<List<String>> loopDoorTrackingData() {
+    public DataBus<List<String>> loopData() {
         HttpConfig httpConfig = ConfigReader.getHttpConfig("upstream_http.json");
 
         HashMap<String, String> cookies = httpConfig.getCookies();
@@ -81,7 +81,7 @@ public class GetOrderServiceHeJia implements GetOrderService {
                 try {
                     allDataSize += datas.size();
                     logger.debug("=============开始插入数据库，一共{}条==============", datas.size());
-                    allDBItemSize += insertSmOrderByString(datas);
+                    allDBItemSize += storeOrderToDB(datas);
                 } catch (Exception e) {
                     logger.error("============== 插入数据库失败！=================");
                     e.printStackTrace();
@@ -100,7 +100,7 @@ public class GetOrderServiceHeJia implements GetOrderService {
     }
 
     @Override
-    public int insertSmOrderByString(List<String> datas) throws Exception {
+    public int storeOrderToDB(List<String> datas) throws Exception {
         int success = 0;
         for (String data : datas) {
             HeJiaOrder order = JSON.parseObject(data, HeJiaOrder.class);

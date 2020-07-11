@@ -1,4 +1,4 @@
-package com.ang.reptile.pojo;
+package com.ang.reptile.entity;
 
 import com.ang.reptile.Enum.BangJiaOrderStateEnum;
 import com.ang.reptile.annotation.NotEncoded;
