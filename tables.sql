@@ -1,11 +1,16 @@
+create table merchent_resp(
+    id serial primary key,
+    merchent_id varchar(255) unique COMMENT '源商家的ID',
+    steps text COMMENT '多种解析步骤',
+    created_at datetime,
+    updated_at datetime
+) COMMENT = '商家响应结果解析步骤表'
+
 create table llj_order(
     id serial primary key,
-    uuid varchar(255) unique COMMENT '源商家的ID',
-    protocol int COMMENT '协议，0 http 1 https',
-    url varchar(255) COMMENT '请求网址（不包括协议在内的地址）',
-    type int COMMENT '请求类型，0 get，1 post',
-    meta_type int COMMENT '参数类型，0 application/json, 1 application/x-www-form-urlencoded, 2 multipart/form-data ',
-    args text COMMENT '参数key，json',
+    uuid varchar(255) unique,
+    merchent_id varchar(255) unique COMMENT '源商家的ID',
+    data varchar(255) COMMENT '数据实体内容',
     created_at datetime,
     updated_at datetime
 ) COMMENT = '下游帮家的订单表，上游的数据会被转换到此表，然后程序读取该表中的数据创建订单。'
@@ -14,10 +19,13 @@ create table merchent_req(
     id serial primary key,
     uuid varchar(255) unique COMMENT '商家的唯一ID',
     protocol int COMMENT '协议，0 http 1 https',
-    url varchar(255) COMMENT '请求网址（不包括协议在内的地址）',
+    domain varchar(255) COMMENT '域名',
+    url varchar(255) COMMENT '请求网址（不包括协议和域名在内的地址）',
     type int COMMENT '请求类型，0 get，1 post',
     meta_type int COMMENT '参数类型，0 application/json, 1 application/x-www-form-urlencoded, 2 multipart/form-data ',
     args text COMMENT '参数key，json',
+    cookies text COMMENT 'cookies',
+    headers text COMMENT 'headers',
     created_at datetime,
     updated_at datetime
 ) COMMENT = '上游商家请求信息'
