@@ -22,11 +22,11 @@ public enum BangJiaOrderStateEnum implements BaseEnum{
         this.code = code;
     }
 
-    public String getMsg() {
+    public String getValue() {
         return msg;
     }
 
-    public void setMsg(String msg) {
+    public void setValue(String msg) {
         this.msg = msg;
     }
 

@@ -1,6 +1,6 @@
 package com.ang.reptile.Enum;
 
-public enum MetaTypeEnum {
+public enum MetaTypeEnum implements BaseEnum {
     JSON(0,"application/json"),FROM_ENCODED(1,"application/x-www-form-urlencoded"),
     FORM_MULTIPART(2,"multipart/form-data");
 

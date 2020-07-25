@@ -1,7 +1,6 @@
 package com.ang.reptile.mapper;
 
-import com.ang.reptile.model.BangJiaServiceType;
-import com.ang.reptile.model.HeJiaServiceType;
+import com.ang.reptile.entity.HeJiaServiceType;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

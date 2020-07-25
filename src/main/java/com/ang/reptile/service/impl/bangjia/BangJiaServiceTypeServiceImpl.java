@@ -1,7 +1,7 @@
 package com.ang.reptile.service.impl.bangjia;
 
 import com.ang.reptile.mapper.BangJiaServiceTypeMapper;
-import com.ang.reptile.model.BangJiaServiceType;
+import com.ang.reptile.entity.BangJiaServiceType;
 import com.ang.reptile.service.BangJiaServiceTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

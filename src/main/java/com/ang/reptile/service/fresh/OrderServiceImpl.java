@@ -66,11 +66,11 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     private Object getOrderByOKHttp(MerchentReq merchentReq) throws Exception {
-        while (true) {
-            Map<String, String> headers = merchentReq.getHeaders();
-            Map<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
-            Map<String, String> cookieMap = merchentReq.getCookies();
+        Map<String, String> headers = merchentReq.getHeaders();
+        Map<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
+        Map<String, String> cookieMap = merchentReq.getCookies();
 
+        while (true) {
             //轮询请求机制，直到请求的数据为空集合的时候停止
 //        For1mBody.Builder builder = new FormBody.Builder();
             MediaType mediaType = MediaType.parse(merchentReq.getMetaType().getValue());
@@ -111,6 +111,7 @@ public class OrderServiceImpl implements OrderService {
                     .build();
             try (Response response = okHttpClient.newCall(request).execute()) {
                 String resultStr = response.body().string();
+                //todo 解析获取到的订单内容
 
 
             } catch (Exception e) {
@@ -130,7 +131,7 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     public DataBus<Object> saveOrder(String orderString, MerchentReq merchentReq) {
-        merchentRespMapper.getByMerchentID(merchentReq.getUuid())
+        merchentRespMapper.getByMerchentID(merchentReq.getUuid());
         //获取解析步骤
 
 

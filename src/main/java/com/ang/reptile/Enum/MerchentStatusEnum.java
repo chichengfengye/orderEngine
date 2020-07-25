@@ -1,6 +1,6 @@
 package com.ang.reptile.Enum;
 
-public enum MerchentStatusEnum {
+public enum MerchentStatusEnum implements BaseEnum{
     ACTIVE(1,"激活"),FORBIDDEN(2, "禁用");
 
     private int code;

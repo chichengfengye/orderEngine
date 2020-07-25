@@ -1,7 +1,7 @@
 package com.ang.reptile.service.impl.hejia;
 
 import com.ang.reptile.mapper.HeJiaServiceTypeMapper;
-import com.ang.reptile.model.HeJiaServiceType;
+import com.ang.reptile.entity.HeJiaServiceType;
 import com.ang.reptile.service.HeJiaServiceTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

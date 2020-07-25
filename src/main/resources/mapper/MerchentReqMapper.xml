@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ang.reptile.mapper.MerchentReqMapper">
+    <sql id="insertColumns">
+        uuid,
+        protocol,
+        domain,
+        url,
+        type,
+        meta_type,
+        args,
+        cookies,
+        headers,
+        created_at,
+        updated_at
+    </sql>
+
+    <sql id="selectColumns">
+        id,
+        uuid,
+        protocol,
+        domain,
+        url,
+        type,
+        meta_type,
+        args,
+        cookies,
+        headers,
+        created_at,
+        updated_at
+    </sql>
+
+
+    <resultMap id="mapId" type="com.ang.reptile.entity.MerchentReq">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="uuid" property="uuid" jdbcType="VARCHAR"/>
+        <result column="protocol" property="protocol" jdbcType="INTEGER" typeHandler="com.ang.reptile.mapper.typehandler.HttpProtocolEnumHandler"/>
+        <result column="domain" property="domain" jdbcType="INTEGER"/>
+        <result column="url" property="url" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="INTEGER" typeHandler="com.ang.reptile.mapper.typehandler.MerchentStatusEnumHandler"/>
+        <result column="metaType" property="metaType" jdbcType="INTEGER" typeHandler="com.ang.reptile.mapper.typehandler.MetaTypeEnumHandler"/>
+        <result column="args" property="args" jdbcType="VARCHAR"/>
+        <result column="cookies" property="cookies" jdbcType="VARCHAR" typeHandler="com.ang.reptile.mapper.typehandler.MapHandler"/>
+        <result column="headers" property="headers" jdbcType="VARCHAR" typeHandler="com.ang.reptile.mapper.typehandler.MapHandler" />
+        <result column="created_at" property="createdAt" jdbcType="DATE"/>
+        <result column="updated_at" property="updatedAt" jdbcType="DATE"/>
+    </resultMap>
+    <!--
+        <insert id="insert" parameterType="com.ang.reptile.entity.BangJiaOrder">
+            insert into bangjia_order(<include refid="insertColumns"></include>)
+            values(
+                #{hejiaOrderCode},
+                #{ordertype},
+                #{number_0},
+                #{servicemode},
+                #{guarantee},
+                #{guaranteeName},
+                #{originname},
+                #{factorynumber},
+                #{repairdate},
+                #{price},
+                #{username},
+                #{mobile},
+                #{province},
+                #{city},
+                #{county},
+                #{town},
+                #{address},
+                #{mbuyprice},
+                #{mbuydate},
+                #{createname},
+                #{note},
+                #{state, typeHandler=com.ang.reptile.mapper.typehandler.BangJiaOrderStateEnumHandler},
+                now()
+            )
+        </insert>
+
+        <insert id="inserts" parameterType="java.util.List">
+            insert into bangjia_order(<include refid="insertColumns"></include>)
+            values
+            <foreach collection="bangJiaOrders" item="order" separator=",">
+                (
+                #{order.hejiaOrderCode},
+                #{order.ordertype},
+                #{order.number_0},
+                #{order.servicemode},
+                #{order.guarantee},
+                #{order.guaranteeName},
+                #{order.originname},
+                #{order.factorynumber},
+                #{order.repairdate},
+                #{order.price},
+                #{order.username},
+                #{order.mobile},
+                #{order.province},
+                #{order.city},
+                #{order.county},
+                #{order.town},
+                #{order.address},
+                #{order.mbuyprice},
+                #{order.mbuydate},
+                #{order.createname},
+                #{order.note},
+                #{order.state, typeHandler=com.ang.reptile.mapper.typehandler.BangJiaOrderStateEnumHandler},
+                now()
+                )
+            </foreach>
+        </insert>
+    -->
+
+
+    <select id="getAll" resultMap="mapId">
+        select
+        <include refid="selectColumns"/>
+        from merchent_req
+    </select>
+
+    <select id="getByIds" resultMap="mapId" >
+        select
+        <include refid="selectColumns"/>
+        from merchent_req
+        where uuid in (
+            <foreach collection="ids" item="id" separator=",">
+                #{id}
+            </foreach>
+        )
+    </select>
+
+   <!-- <update id="updateStateByIds" parameterType="java.util.List">
+        update bangjia_order
+        set state = #{state, typeHandler=com.ang.reptile.mapper.typehandler.BangJiaOrderStateEnumHandler}
+        where id in (
+        <foreach collection="ids" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </update>-->
+</mapper>

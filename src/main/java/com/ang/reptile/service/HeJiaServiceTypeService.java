@@ -1,6 +1,6 @@
 package com.ang.reptile.service;
 
-import com.ang.reptile.model.HeJiaServiceType;
+import com.ang.reptile.entity.HeJiaServiceType;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

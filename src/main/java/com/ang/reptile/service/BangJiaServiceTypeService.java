@@ -1,6 +1,6 @@
 package com.ang.reptile.service;
 
-import com.ang.reptile.model.BangJiaServiceType;
+import com.ang.reptile.entity.BangJiaServiceType;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

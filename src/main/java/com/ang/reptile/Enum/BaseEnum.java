@@ -5,8 +5,8 @@ public interface BaseEnum {
 
     void setCode(int code);
 
-    String getMsg();
+    String getValue();
 
-    void setMsg(String msg);
+    void setValue(String msg);
 
 }
