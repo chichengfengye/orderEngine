@@ -15,7 +15,7 @@ public class MerchentReq {
     String url;// varchar(255) COMMENT '请求网址（不包括协议在内的地址）',
     MerchentStatusEnum type ;//int COMMENT '请求类型，0 get，1 post',
     MetaTypeEnum metaType ;//int COMMENT '参数类型，0 application/json, 1 application/x-www-form-urlencoded, 2 multipart/form-data ',
-    String args;// text COMMENT '参数key，json',
+    Map<String,String> args;// text COMMENT '参数key，json',
     Map<String,String> cookies;//COMMENT 'cookies',
     Map<String,String> headers;// text COMMENT 'headers',
     Date createdAt;// datetime,
@@ -77,11 +77,11 @@ public class MerchentReq {
         this.metaType = metaType;
     }
 
-    public String getArgs() {
+    public Map<String,String> getArgs() {
         return args;
     }
 
-    public void setArgs(String args) {
+    public void setArgs(Map<String,String> args) {
         this.args = args;
     }
 

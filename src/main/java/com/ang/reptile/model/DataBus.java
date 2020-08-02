@@ -1,5 +1,7 @@
 package com.ang.reptile.model;
 
+import com.ang.reptile.Enum.BaseEnum;
+
 public class DataBus<T> {
     public static final int SUCCESS_CODE = 1;
     public static final int FAILURE_CODE = -1;
@@ -14,11 +16,16 @@ public class DataBus<T> {
 
     }
 
+    public DataBus(BaseEnum baseEnum, T data) {
+        this.msg = baseEnum.getValue();
+        this.code = baseEnum.getCode();
+        this.data = data;
+    }
+
     public DataBus(int code, String msg, T data) {
         this.msg = msg;
         this.code = code;
         this.data = data;
-
     }
 
     public String getMsg() {

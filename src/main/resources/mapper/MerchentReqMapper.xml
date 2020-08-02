@@ -39,8 +39,8 @@
         <result column="domain" property="domain" jdbcType="INTEGER"/>
         <result column="url" property="url" jdbcType="VARCHAR"/>
         <result column="type" property="type" jdbcType="INTEGER" typeHandler="com.ang.reptile.mapper.typehandler.MerchentStatusEnumHandler"/>
-        <result column="metaType" property="metaType" jdbcType="INTEGER" typeHandler="com.ang.reptile.mapper.typehandler.MetaTypeEnumHandler"/>
-        <result column="args" property="args" jdbcType="VARCHAR"/>
+        <result column="meta_type" property="metaType" jdbcType="INTEGER" typeHandler="com.ang.reptile.mapper.typehandler.MetaTypeEnumHandler"/>
+        <result column="args" property="args" jdbcType="VARCHAR" typeHandler="com.ang.reptile.mapper.typehandler.MapHandler"/>
         <result column="cookies" property="cookies" jdbcType="VARCHAR" typeHandler="com.ang.reptile.mapper.typehandler.MapHandler"/>
         <result column="headers" property="headers" jdbcType="VARCHAR" typeHandler="com.ang.reptile.mapper.typehandler.MapHandler" />
         <result column="created_at" property="createdAt" jdbcType="DATE"/>

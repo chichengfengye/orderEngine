@@ -1,11 +1,15 @@
 package com.ang.reptile.service.fresh;
 
 import com.ang.reptile.code.MessageCode;
+import com.ang.reptile.code.MessageCode2;
+import com.ang.reptile.entity.BangJiaOrder;
 import com.ang.reptile.entity.MerchentReq;
 import com.ang.reptile.mapper.MerchentMapper;
 import com.ang.reptile.mapper.MerchentReqMapper;
 import com.ang.reptile.mapper.MerchentRespMapper;
 import com.ang.reptile.model.DataBus;
+import com.ang.reptile.util.QueryDataMapUtil;
+import com.ang.reptile.util.http.MyHttpRequestBuilder;
 import com.ang.reptile.util.http.UrlUtil;
 import okhttp3.*;
 import org.slf4j.Logger;
@@ -13,11 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -41,6 +43,8 @@ public class OrderServiceImpl implements OrderService {
     public DataBus<Object> getOrders(List<String> merchentIDs) {
         //1. 获取指定的上游的请求参数
         try {
+            Map<String, Object> res = new HashMap<>();
+
             List<MerchentReq> merchentReqs = merchentReqMapper.getByIds(merchentIDs);
             if (merchentReqs == null || merchentReqs.size() == 0) {
                 return DataBus.success(MessageCode.Code.MERCHENT_REQ_NOT_FOUND, MessageCode.Message.MERCHENT_REQ_NOT_FOUND);
@@ -48,10 +52,11 @@ public class OrderServiceImpl implements OrderService {
 
             //2. 使用请求参数去请求数据回来并入库
             for (MerchentReq merchentReq : merchentReqs) {
-                getOrderByOKHttp(merchentReq);
+                DataBus dataBus = getOrderByOKHttp(merchentReq);
+                res.put(merchentReq.getUuid(), dataBus);
             }
 
-            return DataBus.success();
+            return DataBus.success(res);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,59 +70,37 @@ public class OrderServiceImpl implements OrderService {
      * @param merchentReq
      * @return
      */
-    private Object getOrderByOKHttp(MerchentReq merchentReq) throws Exception {
-        Map<String, String> headers = merchentReq.getHeaders();
+    private DataBus getOrderByOKHttp(MerchentReq merchentReq) throws Exception {
+        //cache for new cookie from the request
         Map<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
-        Map<String, String> cookieMap = merchentReq.getCookies();
-
+        //header
+        Map<String, String> headers = merchentReq.getHeaders();
+        //cookie
+        Map<String, String> cookies = merchentReq.getCookies();
+        //轮询请求机制，直到请求的数据为空集合的时候停止
+        MediaType mediaType = MediaType.parse(merchentReq.getMetaType().getValue());
+        //参数
+        Map<String, String> args = merchentReq.getArgs();//JSON.toJSONString(json);//"{\"name\":\"金凤\"}";
+        //url
+        String url = UrlUtil.generateUrl(merchentReq.getProtocol().getValue(), merchentReq.getDomain(), merchentReq.getUrl());
         while (true) {
-            //轮询请求机制，直到请求的数据为空集合的时候停止
-//        For1mBody.Builder builder = new FormBody.Builder();
-            MediaType mediaType = MediaType.parse(merchentReq.getMetaType().getValue());
-//        JSONObject json = JSONObject.parseObject(merchentReq.getArgs());//QueryDataMapUtil.getQueryDataMap(queryData, Page.class);
-            String jsonStr = merchentReq.getArgs();//JSON.toJSONString(json);//"{\"name\":\"金凤\"}";
-            RequestBody body = RequestBody.create(mediaType, jsonStr);
-            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder().cookieJar(new CookieJar() {
-                @Override
-                public void saveFromResponse(HttpUrl httpUrl, List<Cookie> list) {
-                    cookieStore.put(httpUrl, list);
-                }
-
-                @Override
-                public List<Cookie> loadForRequest(HttpUrl httpUrl) {
-                    List<Cookie> cookies = cookieStore.get(httpUrl);
-                    return cookies != null ? cookies : new ArrayList<Cookie>();
-
-                }
-            });
-            OkHttpClient okHttpClient = clientBuilder.build();
-//        RequestBody body = RequestBody.create(URL_ENCODED, builder);
-
-            //cookie
-            String cookieValue = cookieMap.entrySet().stream()
-                    .map(entry -> entry.getKey() + "=" + entry.getValue()).collect(Collectors.joining(";"));
-            //header
-            Headers.Builder headersBuilder = new Headers.Builder();
-            headersBuilder.add("Cookie", cookieValue);
-            for (Map.Entry<String, String> header : headers.entrySet()) {
-                headersBuilder.add(header.getKey(), header.getValue());
-            }
-
             //do req
-            Request request = new Request.Builder()
-                    .url(UrlUtil.generateUrl(merchentReq.getProtocol().getValue(), merchentReq.getDomain(), merchentReq.getUrl()))
-                    .post(body)
-                    .headers(headersBuilder.build())
-                    .build();
-            try (Response response = okHttpClient.newCall(request).execute()) {
-                String resultStr = response.body().string();
-                //todo 解析获取到的订单内容
+            MyHttpRequestBuilder myHttpRequestBuilder = MyHttpRequestBuilder.createReqInstance();
+            myHttpRequestBuilder.addParameters(args);
+            myHttpRequestBuilder.addCookies(cookies);
+            myHttpRequestBuilder.addHeaders(headers);
+            myHttpRequestBuilder.buildGet(url);
+            Response response = myHttpRequestBuilder.execute();
+            Integer resCode = response.code();
+            if (resCode == 200) {
+                //保存订单
 
 
-            } catch (Exception e) {
-                logger.error("============= 查询数据失败！============");
-                e.printStackTrace();
-                return DataBus.failure();
+                return DataBus.success();
+            } else if (resCode == 302) {
+                return new DataBus(MessageCode2.NEED_REDIRECT, response.header("Location"));
+            } else {
+                return new DataBus(MessageCode2.UNKNOW_ERROR, response.headers());
             }
         }
     }
